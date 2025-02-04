@@ -57,15 +57,33 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         try {
             const location = await getLocation();
+
             if (isClockIn) {
+                // Comprobar si ya existe un registro de entrada sin salida
+                const { data: existingClockInRecords, error: fetchError } = await supabase
+                    .from('attendance')
+                    .select('*')
+                    .eq('user_id', user.id)
+                    .is('clock_out', null); // Buscar registros de entrada sin salida
+
+                if (fetchError) throw fetchError;
+
+                if (existingClockInRecords.length > 0) {
+                    // Si ya existe un registro de entrada sin salida, no se puede fichar otra vez
+                    showModal('Ya tienes un registro de entrada sin fichar salida. Espera a fichar salida.');
+                    return;
+                }
+
+                // Registrar el fichaje de entrada
                 await supabase.from('attendance').insert([{ user_id: user.id, clock_in: new Date().toISOString(), location }]);
                 showModal('Fichaje de entrada correcto.');
             } else {
+                // Buscar un registro de entrada sin salida para fichar la salida
                 const { data: attendanceRecords, error } = await supabase
                     .from('attendance')
                     .select('*')
                     .eq('user_id', user.id)
-                    .is('clock_out', null);  // Buscamos el registro donde `clock_out` es null
+                    .is('clock_out', null); // Buscar registros de entrada sin salida
 
                 if (error) throw error;
 
