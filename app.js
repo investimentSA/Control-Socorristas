@@ -1,7 +1,7 @@
-// Inicializar Supabase
+// Inicializar Supabase correctamente
 const supabaseUrl = 'https://<tu-supabase-url>.supabase.co'; // Reemplaza con tu URL de Supabase
 const supabaseKey = '<tu-supabase-api-key>'; // Reemplaza con tu clave de API de Supabase
-const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+const supabase = supabase.createClient(supabaseUrl, supabaseKey); // Asegúrate de inicializarlo aquí
 
 // Elementos del DOM
 const loginContainer = document.getElementById('login-container');
@@ -128,3 +128,4 @@ checkOutBtn.addEventListener('click', async () => {
         }
     }
 });
+
