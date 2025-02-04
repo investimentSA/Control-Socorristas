@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';  //  Usa variables de entorno en producción
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';  // Usa variables de entorno en producción
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     // Referencias a los elementos HTML
@@ -64,7 +64,8 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const { error } = await supabase.from('attendance')
                     .update({ clock_out: new Date().toISOString(), location })
                     .eq('user_id', user.id)
-                    .is('clock_out', null);
+                    .is('clock_out', null)
+                    .single(); // Asegúrate de actualizar solo un registro
                 if (error) throw error;
                 showModal('Fichado de salida correcto.');
             }
