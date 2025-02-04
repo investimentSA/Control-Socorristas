@@ -1,12 +1,11 @@
-document.addEventListener('DOMContentLoaded', function () {
+document.addEventListener('DOMContentLoaded', async function () {
     // Inicialización de Supabase
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
 
-    // Corregido: Supabase debe ser correctamente inicializado después de cargar el script
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);  // Usamos window para acceder al objeto global
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Variables de los elementos de la interfaz
+    // Variables de la interfaz
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const loginBtn = document.getElementById('login-btn');
@@ -29,9 +28,9 @@ document.addEventListener('DOMContentLoaded', function () {
         modal.style.display = 'none';
     }
 
-    // Función para registrar un nuevo usuario
+    // Función para registrar usuario
     async function registerUser(email, password) {
-        const { user, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({ email, password });
         if (error) {
             showModal('Error al registrar: ' + error.message);
         } else {
@@ -41,28 +40,30 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Función para iniciar sesión
     async function loginUser(email, password) {
-        const { user, error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
-        } else {
-            if (user) {
-                document.getElementById('login-container').style.display = 'none';
-                document.getElementById('app-container').style.display = 'block';
-                userNameSpan.textContent = user.email;
-                getLocation();  // Obtener ubicación del usuario
-            } else {
-                showModal('No se pudo obtener el usuario después de iniciar sesión.');
-            }
+        } else if (data.user) {
+            document.getElementById('login-container').style.display = 'none';
+            document.getElementById('app-container').style.display = 'block';
+            userNameSpan.textContent = data.user.email;
+            getLocation();
         }
     }
 
     // Función para fichar entrada
     async function clockIn() {
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                showModal('No hay usuario autenticado.');
+                return;
+            }
+
             const location = await getLocation();
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('attendance')
-                .insert([{ user_email: supabase.auth.user().email, clock_in: new Date(), location }]);
+                .insert([{ user_email: user.email, clock_in: new Date(), location }]);
 
             if (error) {
                 showModal('Error al fichar entrada: ' + error.message);
@@ -77,11 +78,17 @@ document.addEventListener('DOMContentLoaded', function () {
     // Función para fichar salida
     async function clockOut() {
         try {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) {
+                showModal('No hay usuario autenticado.');
+                return;
+            }
+
             const location = await getLocation();
-            const { data, error } = await supabase
+            const { error } = await supabase
                 .from('attendance')
                 .update({ clock_out: new Date(), location })
-                .match({ user_email: supabase.auth.user().email, clock_out: null });
+                .match({ user_email: user.email, clock_out: null });
 
             if (error) {
                 showModal('Error al fichar salida: ' + error.message);
@@ -126,27 +133,21 @@ document.addEventListener('DOMContentLoaded', function () {
         registerUser(email, password);
     });
 
-    clockInBtn.addEventListener('click', () => {
-        clockIn();
-    });
-
-    clockOutBtn.addEventListener('click', () => {
-        clockOut();
-    });
-
+    clockInBtn.addEventListener('click', clockIn);
+    clockOutBtn.addEventListener('click', clockOut);
     closeModal.addEventListener('click', hideModal);
 
-    // Si ya está autenticado, mostrar la vista de la app
+    // Verificar si hay usuario autenticado al cargar la página
     async function checkUserSession() {
-        const user = supabase.auth.user();
+        const { data: { user } } = await supabase.auth.getUser();
         if (user) {
             document.getElementById('login-container').style.display = 'none';
             document.getElementById('app-container').style.display = 'block';
             userNameSpan.textContent = user.email;
-            await getLocation();  // Obtener ubicación si ya está autenticado
+            await getLocation();
         }
     }
 
-    // Comprobar si ya hay un usuario autenticado al cargar la página
     checkUserSession();
 });
+
