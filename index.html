@@ -3,31 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control de Socorristas</title>
+    <title>Aplicación de Socorristas</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/supabase.min.js"></script> <!-- CDN de supabase -->
 </head>
 <body>
+    <div class="container">
+        <h1>Bienvenido a la App de Socorristas</h1>
+        <div id="login-container">
+            <input type="email" id="email" placeholder="Correo Electrónico" required>
+            <input type="password" id="password" placeholder="Contraseña" required>
+            <button id="login-btn">Iniciar sesión</button>
+            <button id="register-btn">Registrar cuenta</button>
+        </div>
 
-    <div id="login-container">
-        <h1>Iniciar sesión / Registrarse</h1>
-        
-        <input type="email" id="email" placeholder="Correo electrónico" required>
-        <input type="password" id="password" placeholder="Contraseña" required>
-        
-        <button id="login-btn">Iniciar sesión</button>
-        <button id="register-btn">Registrar</button>
+        <div id="app-container" style="display: none;">
+            <h2>Bienvenido, <span id="user-name"></span></h2>
+            <button id="clock-in-btn">Fichar Entrada</button>
+            <button id="clock-out-btn">Fichar Salida</button>
+            <div id="location">Ubicación: <span id="user-location"></span></div>
+        </div>
+
+        <!-- Modal -->
+        <div id="modal" class="modal">
+            <div class="modal-content">
+                <span id="modal-message"></span>
+                <button id="close-modal">Cerrar</button>
+            </div>
+        </div>
     </div>
-
-    <div id="socorrista-container" style="display: none;">
-        <h1>Socorrista</h1>
-        <button id="check-in">Fichar Entrada</button>
-        <button id="check-out">Fichar Salida</button>
-        <p id="current-location">Ubicación actual: <span id="location"></span></p>
-        <p id="message"></p>
-    </div>
-
-    <!-- Incluir el SDK de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
