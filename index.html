@@ -3,39 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fichaje de Socorristas</title>
+    <title>App de Registro</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Pantalla de Login -->
+    <!-- Contenedor de inicio de sesión -->
     <div id="login-container">
-        <h2>Iniciar sesión</h2>
-        <input type="email" id="email" placeholder="Correo electrónico" required>
-        <input type="password" id="password" placeholder="Contraseña" required>
+        <h2>Iniciar Sesión</h2>
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
         <button id="login-btn">Iniciar sesión</button>
-        <p>¿No tienes cuenta? <button id="go-to-register-btn">Registrarse</button></p>
-    </div>
-
-    <!-- Pantalla de Registro -->
-    <div id="register-container" style="display: none;">
-        <h2>Registro</h2>
-        <input type="email" id="register-email" placeholder="Correo electrónico" required>
-        <input type="password" id="register-password" placeholder="Contraseña" required>
         <button id="register-btn">Registrarse</button>
-        <p>¿Ya tienes cuenta? <button id="go-to-login-btn">Iniciar sesión</button></p>
+    </div>
+    
+    <!-- Contenedor de configuración de perfil (solo después del registro) -->
+    <div id="profile-setup-container" style="display:none;">
+        <h2>Completa tu perfil</h2>
+        <input type="text" id="user-name-input" placeholder="Nombre" required>
+        <input type="file" id="photo-upload" accept="image/*">
+        <button id="save-profile-btn">Guardar Perfil</button>
     </div>
 
-    <!-- Aquí se mostrarán los demás elementos después del login -->
-    <div id="app-container" style="display: none;">
-        <!-- Contenido de la aplicación después de iniciar sesión -->
+    <!-- Contenedor principal de la aplicación -->
+    <div id="app-container" style="display:none;">
+        <p>Bienvenido, <span id="user-name"></span></p>
+        <img id="user-photo" src="" alt="Foto de perfil" style="display:none; width:100px; height:100px; border-radius:50%;">
+        <p>Ubicación: <span id="user-location"></span></p>
+        <button id="clock-in-btn">Fichar Entrada</button>
+        <button id="clock-out-btn">Fichar Salida</button>
+        <button id="logout-btn">Cerrar Sesión</button>
     </div>
 
     <!-- Modal para mostrar mensajes -->
     <div id="modal" style="display:none;">
-        <p id="modal-message"></p>
-        <button id="close-modal">Cerrar</button>
+        <div>
+            <span id="modal-message"></span>
+            <button id="close-modal">Cerrar</button>
+        </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <!-- Cargar el script de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.js"></script>
+    
+    <!-- Tu archivo app.js -->
     <script src="app.js"></script>
 </body>
 </html>
