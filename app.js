@@ -15,6 +15,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const modalMessage = document.getElementById('modal-message');
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('close-modal');
+    let map;
 
     function showModal(message) {
         modalMessage.textContent = message;
@@ -57,17 +58,14 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!user) return showModal('No hay usuario autenticado.');
         
         try {
+            // Solo obtenemos la ubicación sin mostrar el modal de error
             const location = await getLocation();
-            const { error } = await supabase.from('attendance').insert([{
+            await supabase.from('attendance').insert([{
                 user_id: user.id,  
                 clock_in: new Date().toISOString(),
                 location
             }]);
-            if (error) {
-                showModal('Error al fichar entrada: ' + error.message);
-            } else {
-                showModal('Fichado correctamente.');
-            }
+            showModal('Fichado correctamente.');  // Mostrar mensaje de éxito sin error
         } catch (err) {
             showModal('Error al obtener ubicación: ' + err);
         }
@@ -78,6 +76,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!user) return showModal('No hay usuario autenticado.');
         
         try {
+            // Solo obtenemos la ubicación sin mostrar el modal de error
             const location = await getLocation();
             const { error } = await supabase.from('attendance').update({
                 clock_out: new Date().toISOString(),
@@ -98,7 +97,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
+                    position => {
+                        // Mostrar ubicación en el mapa de Google
+                        const latitude = position.coords.latitude;
+                        const longitude = position.coords.longitude;
+                        resolve(`${latitude}, ${longitude}`);
+                        showMap(latitude, longitude);
+                    },
                     (error) => {
                         if (error.code === error.PERMISSION_DENIED) {
                             reject('El permiso de ubicación ha sido denegado. Por favor, habilita la geolocalización en tu navegador.');
@@ -110,6 +115,21 @@ document.addEventListener('DOMContentLoaded', async function () {
             } else {
                 reject('Geolocalización no soportada');
             }
+        });
+    }
+
+    function showMap(latitude, longitude) {
+        const location = { lat: latitude, lng: longitude };
+        if (!map) {
+            map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: location
+            });
+        }
+        new google.maps.Marker({
+            position: location,
+            map: map,
+            title: "Tu ubicación"
         });
     }
 
