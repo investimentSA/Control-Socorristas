@@ -99,7 +99,13 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
-                    error => reject('Error al obtener ubicación: ' + error.message)
+                    (error) => {
+                        if (error.code === error.PERMISSION_DENIED) {
+                            reject('El permiso de ubicación ha sido denegado. Por favor, habilita la geolocalización en tu navegador.');
+                        } else {
+                            reject('Error al obtener ubicación: ' + error.message);
+                        }
+                    }
                 );
             } else {
                 reject('Geolocalización no soportada');
@@ -133,3 +139,4 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     checkUserSession();
 });
+
