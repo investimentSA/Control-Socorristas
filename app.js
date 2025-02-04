@@ -59,15 +59,36 @@ document.addEventListener('DOMContentLoaded', async function () {
             const location = await getLocation();
             if (isClockIn) {
                 await supabase.from('attendance').insert([{ user_id: user.id, clock_in: new Date().toISOString(), location }]);
-                showModal('Fichado de entrada correcto.');
+                showModal('Fichaje de entrada correcto.');
             } else {
-                const { error } = await supabase.from('attendance')
-                    .update({ clock_out: new Date().toISOString(), location })
+                const { data: attendanceRecords, error } = await supabase
+                    .from('attendance')
+                    .select('*')
                     .eq('user_id', user.id)
-                    .is('clock_out', null)
-                    .single(); // Asegúrate de actualizar solo un registro
+                    .is('clock_out', null);  // Buscamos el registro donde `clock_out` es null
+
                 if (error) throw error;
-                showModal('Fichado de salida correcto.');
+
+                if (attendanceRecords.length === 0) {
+                    showModal('No se encontró un registro de entrada para fichar la salida.');
+                    return;
+                }
+
+                if (attendanceRecords.length > 1) {
+                    showModal('Hay múltiples registros de entrada sin fichar salida. Contacta con soporte.');
+                    return;
+                }
+
+                // Actualizamos el primer registro de entrada encontrado
+                const { error: updateError } = await supabase
+                    .from('attendance')
+                    .update({ clock_out: new Date().toISOString(), location })
+                    .eq('id', attendanceRecords[0].id)  // Actualizar el registro con ese `id`
+                    .single();
+
+                if (updateError) throw updateError;
+
+                showModal('Fichaje de salida correcto.');
             }
         } catch (err) {
             console.log('Error al fichar:', err); // Imprimir error completo en consola
