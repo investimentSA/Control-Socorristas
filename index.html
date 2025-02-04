@@ -3,31 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Control Socorristas</title>
+    <title>Control de Socorristas</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-    <!-- Formulario de login -->
-    <div class="login-container">
-        <h1>Bienvenido, Socorrista</h1>
-        <p>Inicia sesión para fichar tu entrada y salida.</p>
-
-        <div id="login-form">
-            <input type="email" id="email" placeholder="Correo electrónico" required />
-            <input type="password" id="password" placeholder="Contraseña" required />
-            <button type="submit" id="login-btn">Iniciar sesión</button>
-            <p id="error-message" class="error-message"></p>
-        </div>
-
-        <div id="register-form">
-            <p>Aún no tienes cuenta? <a href="register.html">Registrarse aquí</a></p>
-        </div>
+    <div id="login-container">
+        <h1>Iniciar sesión / Registrarse</h1>
+        
+        <input type="email" id="email" placeholder="Correo electrónico" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        
+        <button id="login-btn">Iniciar sesión</button>
+        <button id="register-btn">Registrar</button>
     </div>
 
-    <!-- Referencia a los archivos JavaScript como módulos -->
-    <script type="module" src="firebase.js"></script> <!-- Configuración Firebase -->
-    <script type="module" src="app.js"></script> <!-- Lógica de la app -->
+    <div id="socorrista-container" style="display: none;">
+        <h1>Socorrista</h1>
+        <button id="check-in">Fichar Entrada</button>
+        <button id="check-out">Fichar Salida</button>
+        <p id="current-location">Ubicación actual: <span id="location"></span></p>
+        <p id="message"></p>
+    </div>
+
+    <!-- Incluir el SDK de Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.min.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
-
