@@ -45,39 +45,51 @@ document.addEventListener('DOMContentLoaded', function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('app-container').style.display = 'block';
-            userNameSpan.textContent = user.email;
-            getLocation();  // Obtener ubicación del usuario
+            if (user) {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('app-container').style.display = 'block';
+                userNameSpan.textContent = user.email;
+                getLocation();  // Obtener ubicación del usuario
+            } else {
+                showModal('No se pudo obtener el usuario después de iniciar sesión.');
+            }
         }
     }
 
     // Función para fichar entrada
     async function clockIn() {
-        const location = await getLocation();
-        const { data, error } = await supabase
-            .from('attendance')
-            .insert([{ user_email: supabase.auth.user().email, clock_in: new Date(), location }]);
+        try {
+            const location = await getLocation();
+            const { data, error } = await supabase
+                .from('attendance')
+                .insert([{ user_email: supabase.auth.user().email, clock_in: new Date(), location }]);
 
-        if (error) {
-            showModal('Error al fichar entrada: ' + error.message);
-        } else {
-            showModal('Fichado correctamente a la entrada.');
+            if (error) {
+                showModal('Error al fichar entrada: ' + error.message);
+            } else {
+                showModal('Fichado correctamente a la entrada.');
+            }
+        } catch (error) {
+            showModal('Error al fichar entrada: ' + error);
         }
     }
 
     // Función para fichar salida
     async function clockOut() {
-        const location = await getLocation();
-        const { data, error } = await supabase
-            .from('attendance')
-            .update({ clock_out: new Date(), location })
-            .match({ user_email: supabase.auth.user().email, clock_out: null });
+        try {
+            const location = await getLocation();
+            const { data, error } = await supabase
+                .from('attendance')
+                .update({ clock_out: new Date(), location })
+                .match({ user_email: supabase.auth.user().email, clock_out: null });
 
-        if (error) {
-            showModal('Error al fichar salida: ' + error.message);
-        } else {
-            showModal('Fichado correctamente a la salida.');
+            if (error) {
+                showModal('Error al fichar salida: ' + error.message);
+            } else {
+                showModal('Fichado correctamente a la salida.');
+            }
+        } catch (error) {
+            showModal('Error al fichar salida: ' + error);
         }
     }
 
