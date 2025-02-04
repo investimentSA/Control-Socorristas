@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            checkUserProfile(data.user.id);
+            checkUserProfile(data.user.id, email);  // Pasamos el email al comprobar el perfil
         }
     }
 
@@ -99,16 +99,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function checkUserSession() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-            checkUserProfile(user.id);
+            checkUserProfile(user.id, user.email);  // Añadido email a la comprobación
         } else {
             showLoginView();
         }
     }
 
-    async function checkUserProfile(userId) {
+    async function checkUserProfile(userId, email) {
         const profile = await getUserProfile(userId);
-        if (!profile || !profile.name || !profile.photo_url) {
-            showProfileModal(userId);
+        if (!profile || !profile.name || !profile.photo_url || !profile.email) {
+            showProfileModal(userId, email);  // Aseguramos que email esté disponible
         } else {
             showAppView(profile.name, profile.photo_url);
         }
@@ -117,17 +117,18 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function getUserProfile(userId) {
         const { data, error } = await supabase
             .from('socorristas')
-            .select('name, photo_url')
+            .select('name, photo_url, email')
             .eq('id', userId)
             .single();
         return error ? null : data;
     }
 
-    function showProfileModal(userId) {
+    function showProfileModal(userId, email) {
         const profileModal = document.createElement('div');
         profileModal.innerHTML = `
             <h3>Completa tu perfil</h3>
             <input type="text" id="profile-name" placeholder="Nombre Completo" required>
+            <input type="email" id="profile-email" value="${email}" placeholder="Correo Electrónico" required>
             <input type="file" id="profile-photo" accept="image/*" required>
             <button id="save-profile">Guardar</button>
         `;
@@ -135,9 +136,10 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         document.getElementById('save-profile').addEventListener('click', async () => {
             const name = document.getElementById('profile-name').value;
+            const email = document.getElementById('profile-email').value;
             const photo = document.getElementById('profile-photo').files[0];
 
-            if (!name || !photo) {
+            if (!name || !email || !photo) {
                 showModal('Por favor, completa todos los campos.');
                 return;
             }
@@ -158,7 +160,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             // Actualizar el perfil del usuario en la base de datos
             const { error } = await supabase
                 .from('socorristas')
-                .upsert({ id: userId, name, photo_url: photoUrl });
+                .upsert({ id: userId, name, email, photo_url: photoUrl });
 
             if (error) {
                 showModal('Error al guardar el perfil: ' + error.message);
