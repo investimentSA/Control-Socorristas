@@ -7,21 +7,34 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Contenedor de inicio de sesión -->
     <div id="login-container">
+        <h2>Iniciar Sesión</h2>
         <input type="email" id="email" placeholder="Email" required>
         <input type="password" id="password" placeholder="Password" required>
         <button id="login-btn">Iniciar sesión</button>
         <button id="register-btn">Registrarse</button>
     </div>
     
+    <!-- Contenedor de configuración de perfil (solo después del registro) -->
+    <div id="profile-setup-container" style="display:none;">
+        <h2>Completa tu perfil</h2>
+        <input type="text" id="user-name-input" placeholder="Nombre" required>
+        <input type="file" id="photo-upload" accept="image/*">
+        <button id="save-profile-btn">Guardar Perfil</button>
+    </div>
+
+    <!-- Contenedor principal de la aplicación -->
     <div id="app-container" style="display:none;">
         <p>Bienvenido, <span id="user-name"></span></p>
+        <img id="user-photo" src="" alt="Foto de perfil" style="display:none; width:100px; height:100px; border-radius:50%;">
         <p>Ubicación: <span id="user-location"></span></p>
         <button id="clock-in-btn">Fichar Entrada</button>
         <button id="clock-out-btn">Fichar Salida</button>
         <button id="logout-btn">Cerrar Sesión</button>
     </div>
 
+    <!-- Modal para mostrar mensajes -->
     <div id="modal" style="display:none;">
         <div>
             <span id="modal-message"></span>
