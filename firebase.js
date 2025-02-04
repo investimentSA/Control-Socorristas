@@ -1,4 +1,6 @@
-// Importamos las funciones necesarias de Firebase
+// firebase.js
+
+// Importa Firebase y las funciones necesarias
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -14,11 +16,13 @@ const firebaseConfig = {
   measurementId: "G-BEEQ96MH8B"
 };
 
-// Inicializamos Firebase
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
+
+// Inicializa Auth y Firestore
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Exportamos para usarlos en otros archivos
+// Exporta las variables necesarias
 export { auth, db };
 
