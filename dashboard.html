@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="styles.css"> <!-- Enlazamos los estilos -->
+</head>
+<body>
+  <div class="dashboard-container">
+    <h1>Bienvenido, Socorrista</h1>
+    <p><strong>Ubicación actual:</strong> <span id="location">Cargando...</span></p>
+
+    <div id="buttons">
+      <button id="check-in-btn">Fichar Entrada</button>
+      <button id="check-out-btn">Fichar Salida</button>
+    </div>
+
+    <div id="location-info">
+      <p><strong>Última ubicación registrada:</strong> <span id="last-location">Cargando...</span></p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
