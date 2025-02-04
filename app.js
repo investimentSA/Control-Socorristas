@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
-                    position => resolve(${position.coords.latitude}, ${position.coords.longitude}),
+                    position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
                     error => {
                         if (error.code === error.PERMISSION_DENIED) {
                             reject('No has permitido acceder a tu ubicación. Por favor, habilita la geolocalización.');
@@ -196,13 +196,13 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function showProfileModal(userId, email) {
         const profileModal = document.createElement('div');
-        profileModal.innerHTML = 
+        profileModal.innerHTML = `
             <h3>Completa tu perfil</h3>
             <input type="text" id="profile-name" placeholder="Nombre Completo" required>
             <input type="email" id="profile-email" value="${email}" placeholder="Correo Electrónico" required>
             <input type="file" id="profile-photo" accept="image/*" required>
             <button id="save-profile">Guardar</button>
-        ;
+        `;
         document.body.appendChild(profileModal);
 
         document.getElementById('save-profile').addEventListener('click', async () => {
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const { data: fileData, error: fileError } = await supabase
                 .storage
                 .from('avatars')
-                .upload(public/${userId}-${Date.now()}, photo);
+                .upload(`public/${userId}-${Date.now()}`, photo);
 
             if (fileError) {
                 showModal('Error al subir la foto: ' + fileError.message);
@@ -248,7 +248,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         document.getElementById('app-container').style.display = 'block';
         userNameSpan.textContent = name;
         if (photoUrl) {
-            userPhoto.src = ${supabaseUrl}/storage/v1/object/public/avatars/${photoUrl};
+            userPhoto.src = `${supabaseUrl}/storage/v1/object/public/avatars/${photoUrl}`;
             userPhoto.style.display = 'block';
         }
     }
