@@ -1,9 +1,7 @@
-// Asegúrate de cargar primero el script de Supabase antes de usarlo
-
-// Inicialización de supabase
+// Inicialización de Supabase
 const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; 
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; 
-const supabase = supabase.createClient(supabaseUrl, supabaseKey); // Esta es la forma correcta de inicializar la conexión a Supabase
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // Variables de los elementos de la interfaz
 const emailInput = document.getElementById('email');
@@ -124,10 +122,16 @@ clockOutBtn.addEventListener('click', () => {
 closeModal.addEventListener('click', hideModal);
 
 // Si ya está autenticado, mostrar la vista de la app
-if (supabase.auth.user()) {
-    document.getElementById('login-container').style.display = 'none';
-    document.getElementById('app-container').style.display = 'block';
-    userNameSpan.textContent = supabase.auth.user().email;
-    getLocation();
+async function checkUserSession() {
+    const user = supabase.auth.user();
+    if (user) {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        userNameSpan.textContent = user.email;
+        await getLocation();  // Obtener ubicación si ya está autenticado
+    }
 }
+
+// Comprobar si ya hay un usuario autenticado al cargar la página
+checkUserSession();
 
