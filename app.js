@@ -27,43 +27,71 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function registerUser(email, password) {
         const { error } = await supabase.auth.signUp({ email, password });
-        error ? showModal('Error al registrar: ' + error.message) : showModal('¡Registro exitoso!');
+        if (error) {
+            showModal('Error al registrar: ' + error.message);
+        } else {
+            showModal('¡Registro exitoso!');
+        }
     }
 
     async function loginUser(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        error ? showModal('Error al iniciar sesión: ' + error.message) : showAppView(data.user.email);
+        if (error) {
+            showModal('Error al iniciar sesión: ' + error.message);
+        } else {
+            showAppView(data.user.email);
+        }
     }
 
     async function logoutUser() {
         const { error } = await supabase.auth.signOut();
-        error ? showModal('Error al cerrar sesión: ' + error.message) : showLoginView();
+        if (error) {
+            showModal('Error al cerrar sesión: ' + error.message);
+        } else {
+            showLoginView();
+        }
     }
 
     async function clockIn() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return showModal('No hay usuario autenticado.');
         
-        const location = await getLocation();
-        const { error } = await supabase.from('attendance').insert([{
-            user_id: user.id,  // Cambié user_email por user_id, ahora usamos el UUID
-            clock_in: new Date().toISOString(),
-            location
-        }]);
-        error ? showModal('Error al fichar entrada: ' + error.message) : showModal('Fichado correctamente.');
+        try {
+            const location = await getLocation();
+            const { error } = await supabase.from('attendance').insert([{
+                user_id: user.id,  
+                clock_in: new Date().toISOString(),
+                location
+            }]);
+            if (error) {
+                showModal('Error al fichar entrada: ' + error.message);
+            } else {
+                showModal('Fichado correctamente.');
+            }
+        } catch (err) {
+            showModal('Error al obtener ubicación: ' + err);
+        }
     }
 
     async function clockOut() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return showModal('No hay usuario autenticado.');
         
-        const location = await getLocation();
-        const { error } = await supabase.from('attendance').update({
-            clock_out: new Date().toISOString(),
-            location
-        }).eq('user_id', user.id)  // Cambié user_email por user_id
-        .is('clock_out', null);
-        error ? showModal('Error al fichar salida: ' + error.message) : showModal('Fichado correctamente.');
+        try {
+            const location = await getLocation();
+            const { error } = await supabase.from('attendance').update({
+                clock_out: new Date().toISOString(),
+                location
+            }).eq('user_id', user.id).is('clock_out', null);
+
+            if (error) {
+                showModal('Error al fichar salida: ' + error.message);
+            } else {
+                showModal('Fichado correctamente.');
+            }
+        } catch (err) {
+            showModal('Error al obtener ubicación: ' + err);
+        }
     }
 
     function getLocation() {
@@ -71,7 +99,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
-                    () => reject('Error al obtener ubicación')
+                    error => reject('Error al obtener ubicación: ' + error.message)
                 );
             } else {
                 reject('Geolocalización no soportada');
