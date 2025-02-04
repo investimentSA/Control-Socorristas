@@ -45,7 +45,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!user) return showModal('No hay usuario autenticado.');
         
         const location = await getLocation();
-        const { error } = await supabase.from('attendance').insert([{ user_email: user.email, clock_in: new Date().toISOString(), location }]);
+        const { error } = await supabase.from('attendance').insert([{
+            user_id: user.id,  // Cambié user_email por user_id, ahora usamos el UUID
+            clock_in: new Date().toISOString(),
+            location
+        }]);
         error ? showModal('Error al fichar entrada: ' + error.message) : showModal('Fichado correctamente.');
     }
 
@@ -54,7 +58,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!user) return showModal('No hay usuario autenticado.');
         
         const location = await getLocation();
-        const { error } = await supabase.from('attendance').update({ clock_out: new Date().toISOString(), location }).eq('user_email', user.email).is('clock_out', null);
+        const { error } = await supabase.from('attendance').update({
+            clock_out: new Date().toISOString(),
+            location
+        }).eq('user_id', user.id)  // Cambié user_email por user_id
+        .is('clock_out', null);
         error ? showModal('Error al fichar salida: ' + error.message) : showModal('Fichado correctamente.');
     }
 
