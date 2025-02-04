@@ -1,4 +1,4 @@
-// Importar funciones necesarias de Firebase
+// Importa los módulos necesarios desde Firebase
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
@@ -14,14 +14,11 @@ const firebaseConfig = {
   measurementId: "G-BEEQ96MH8B"
 };
 
-// Inicializar Firebase
+// Inicializa Firebase
 const app = initializeApp(firebaseConfig);
-
-// Obtener las instancias necesarias
 const auth = getAuth(app);
-const db = getFirestore(app);
 
-// Función de inicio de sesión
+// Manejadores de evento para login y registro
 document.getElementById('login-btn').addEventListener('click', (e) => {
   e.preventDefault();
   const email = document.getElementById('email').value;
@@ -34,7 +31,7 @@ document.getElementById('login-btn').addEventListener('click', (e) => {
       showModal('Éxito', '¡Has iniciado sesión correctamente!', 'success');
       setTimeout(() => {
         window.location.href = 'dashboard.html'; // Redirigir al dashboard
-      }, 2000); // Esperar 2 segundos antes de redirigir
+      }, 2000);
     })
     .catch((error) => {
       const errorMessage = error.message;
@@ -42,28 +39,7 @@ document.getElementById('login-btn').addEventListener('click', (e) => {
     });
 });
 
-// Función de registro de usuario
-document.getElementById('register-btn').addEventListener('click', (e) => {
-  e.preventDefault();
-  const email = document.getElementById('email').value;
-  const password = document.getElementById('password').value;
-
-  createUserWithEmailAndPassword(auth, email, password)
-    .then((userCredential) => {
-      const user = userCredential.user;
-      console.log('Usuario registrado:', user);
-      showModal('Éxito', '¡Te has registrado correctamente!', 'success');
-      setTimeout(() => {
-        window.location.href = 'index.html'; // Redirigir al login después del registro
-      }, 2000); // Esperar 2 segundos antes de redirigir
-    })
-    .catch((error) => {
-      const errorMessage = error.message;
-      showModal('Error', errorMessage, 'error');
-    });
-});
-
-// Mostrar modal de éxito o error
+// Función para mostrar modal de éxito o error
 function showModal(title, message, type) {
   const modal = document.createElement('div');
   modal.classList.add('modal', type);
