@@ -107,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function checkUserProfile(userId, email) {
         const profile = await getUserProfile(userId);
-        if (!profile || !profile.name || !profile.photo_url || !profile.email) {
+        if (!profile || !profile.name || !profile.photo_url) {
             showProfileModal(userId, email);  // Aseguramos que email esté disponible
         } else {
             showAppView(profile.name, profile.photo_url);
@@ -197,5 +197,5 @@ document.addEventListener('DOMContentLoaded', async function () {
     logoutBtn.addEventListener('click', logoutUser);
     closeModal.addEventListener('click', hideModal);
 
-    checkUserSession();
+    checkUserSession(); // Verificar la sesión al cargar la página
 });
