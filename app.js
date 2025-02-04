@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 const { error: updateError } = await supabase
                     .from('attendance')
                     .update({ clock_out: new Date().toISOString(), location })
-                    .eq('id', attendanceRecords[0].id)  // Actualizar el registro con ese id
+                    .eq('id', attendanceRecords[0].id)  // Actualizar el registro con ese `id`
                     .single();
 
                 if (updateError) throw updateError;
@@ -270,3 +270,4 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     checkUserSession(); // Verificar la sesión al cargar la página
 });
+
