@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Control Socorristas</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Socorristas</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="login-container">
-    <h1>Bienvenido, Socorrista</h1>
-    <p>Inicia sesión para fichar tu entrada y salida.</p>
 
-    <div id="login-form">
-      <input type="email" id="email" placeholder="Correo electrónico" required />
-      <input type="password" id="password" placeholder="Contraseña" required />
-      <button type="submit" id="login-btn">Iniciar sesión</button>
-      <p id="error-message" class="error-message"></p>
+    <!-- Formulario de login -->
+    <div class="login-container">
+        <h1>Bienvenido, Socorrista</h1>
+        <p>Inicia sesión para fichar tu entrada y salida.</p>
+
+        <div id="login-form">
+            <input type="email" id="email" placeholder="Correo electrónico" required />
+            <input type="password" id="password" placeholder="Contraseña" required />
+            <button type="submit" id="login-btn">Iniciar sesión</button>
+            <p id="error-message" class="error-message"></p>
+        </div>
+
+        <div id="register-form">
+            <p>Aún no tienes cuenta? <a href="register.html">Registrarse aquí</a></p>
+        </div>
     </div>
 
-    <div id="register-form">
-      <p>Aún no tienes cuenta? <a href="register.html">Registrarse aquí</a></p>
-    </div>
-  </div>
-
-  <!-- Referencia al archivo de Firebase (firebase.js) como un módulo -->
-  <script type="module" src="firebase.js"></script>
-  <!-- Referencia a tu archivo de aplicación (app.js) como un módulo -->
-  <script type="module" src="app.js"></script>
+    <!-- Referencia a los archivos JavaScript como módulos -->
+    <script type="module" src="firebase.js"></script> <!-- Configuración Firebase -->
+    <script type="module" src="app.js"></script> <!-- Lógica de la app -->
 </body>
 </html>
 
