@@ -5,20 +5,21 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    // Variables de la interfaz
+    // Elementos de la UI
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const loginBtn = document.getElementById('login-btn');
     const registerBtn = document.getElementById('register-btn');
     const clockInBtn = document.getElementById('clock-in-btn');
     const clockOutBtn = document.getElementById('clock-out-btn');
+    const logoutBtn = document.getElementById('logout-btn');  // Nuevo botón de logout
     const locationSpan = document.getElementById('user-location');
     const userNameSpan = document.getElementById('user-name');
     const modalMessage = document.getElementById('modal-message');
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('close-modal');
 
-    // Funciones para mostrar/ocultar modales
+    // Funciones para mostrar/ocultar modal
     function showModal(message) {
         modalMessage.textContent = message;
         modal.style.display = 'block';
@@ -44,10 +45,18 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else if (data.user) {
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('app-container').style.display = 'block';
-            userNameSpan.textContent = data.user.email;
+            showAppView(data.user.email);
             getLocation();
+        }
+    }
+
+    // Función para cerrar sesión
+    async function logoutUser() {
+        const { error } = await supabase.auth.signOut();
+        if (error) {
+            showModal('Error al cerrar sesión: ' + error.message);
+        } else {
+            showLoginView();
         }
     }
 
@@ -63,7 +72,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             const location = await getLocation();
             const { error } = await supabase
                 .from('attendance')
-                .insert([{ user_email: user.email, clock_in: new Date(), location }]);
+                .insert([{ user_email: user.email, clock_in: new Date().toISOString(), location }]);
 
             if (error) {
                 showModal('Error al fichar entrada: ' + error.message);
@@ -87,8 +96,9 @@ document.addEventListener('DOMContentLoaded', async function () {
             const location = await getLocation();
             const { error } = await supabase
                 .from('attendance')
-                .update({ clock_out: new Date(), location })
-                .match({ user_email: user.email, clock_out: null });
+                .update({ clock_out: new Date().toISOString(), location })
+                .eq('user_email', user.email)
+                .is('clock_out', null);
 
             if (error) {
                 showModal('Error al fichar salida: ' + error.message);
@@ -120,6 +130,20 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
+    // Mostrar vista de la aplicación
+    function showAppView(email) {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        userNameSpan.textContent = email;
+    }
+
+    // Mostrar vista de login
+    function showLoginView() {
+        document.getElementById('login-container').style.display = 'block';
+        document.getElementById('app-container').style.display = 'none';
+        userNameSpan.textContent = '';
+    }
+
     // Eventos de los botones
     loginBtn.addEventListener('click', () => {
         const email = emailInput.value;
@@ -135,19 +159,19 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     clockInBtn.addEventListener('click', clockIn);
     clockOutBtn.addEventListener('click', clockOut);
+    logoutBtn.addEventListener('click', logoutUser);  // Evento de logout
     closeModal.addEventListener('click', hideModal);
 
-    // Verificar si hay usuario autenticado al cargar la página
+    // Verificar sesión al cargar la página
     async function checkUserSession() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-            document.getElementById('login-container').style.display = 'none';
-            document.getElementById('app-container').style.display = 'block';
-            userNameSpan.textContent = user.email;
+            showAppView(user.email);
             await getLocation();
+        } else {
+            showLoginView();
         }
     }
 
     checkUserSession();
 });
-
