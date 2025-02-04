@@ -1,105 +1,56 @@
-/* Estilos generales */
 body {
-  font-family: 'Arial', sans-serif;
-  margin: 0;
-  padding: 0;
-  background-color: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+    background-color: #f4f4f4;
 }
 
-h1 {
-  text-align: center;
-  color: #333;
-}
-
-/* Estilo del formulario de login */
-.login-container,
-.register-container {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  max-width: 400px;
-}
-
-input {
-  width: 100%;
-  padding: 10px;
-  margin: 10px 0;
-  border-radius: 4px;
-  border: 1px solid #ccc;
+.container {
+    text-align: center;
+    width: 300px;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
 button {
-  width: 100%;
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 16px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    margin-top: 10px;
+    border-radius: 5px;
 }
 
 button:hover {
-  background-color: #0056b3;
+    background-color: #45a049;
 }
 
-/* Estilos para los modales */
-.modal {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-  z-index: 9999;
+#modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    justify-content: center;
+    align-items: center;
 }
 
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+.modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
 }
 
-.modal-body {
-  margin-top: 10px;
-  font-size: 14px;
-}
-
-.modal.success {
-  border-left: 5px solid green;
-}
-
-.modal.error {
-  border-left: 5px solid red;
-}
-
-button {
-  background: #007bff;
-  color: white;
-}
-
-button:hover {
-  background-color: #0056b3;
-}
-
-/* Modales en el cuerpo */
-.modal-body p {
-  font-size: 16px;
-}
-
-.modal-header h3 {
-  margin: 0;
-}
-
-button {
-  font-size: 16px;
+#close-modal {
+    margin-top: 10px;
 }
 
