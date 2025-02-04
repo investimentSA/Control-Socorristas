@@ -1,56 +1,109 @@
+/* General */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Arial', sans-serif;
+    background-color: #f3f4f6;
+    color: #333;
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
-    margin: 0;
-    background-color: #f4f4f4;
 }
 
-.container {
-    text-align: center;
-    width: 300px;
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+#login-container,
+#app-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    max-width: 400px;
+    width: 100%;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 4px;
+    border: 1px solid #ddd;
+    font-size: 16px;
 }
 
 button {
+    width: 100%;
+    padding: 12px;
     background-color: #4CAF50;
     color: white;
+    font-size: 16px;
     border: none;
-    padding: 10px 20px;
+    border-radius: 4px;
     cursor: pointer;
-    margin-top: 10px;
-    border-radius: 5px;
+    margin: 10px 0;
 }
 
 button:hover {
     background-color: #45a049;
 }
 
-#modal {
+#app-container {
     display: none;
+}
+
+#modal {
     position: fixed;
     top: 0;
     left: 0;
-    right: 0;
-    bottom: 0;
+    width: 100%;
+    height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
+    display: none;
     justify-content: center;
     align-items: center;
 }
 
-.modal-content {
+#modal > div {
     background-color: white;
-    padding: 20px;
-    border-radius: 10px;
+    padding: 30px;
+    border-radius: 8px;
+    max-width: 400px;
+    width: 100%;
     text-align: center;
 }
 
+#modal-message {
+    margin-bottom: 20px;
+    font-size: 18px;
+}
+
 #close-modal {
-    margin-top: 10px;
+    padding: 8px 12px;
+    background-color: #f44336;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#close-modal:hover {
+    background-color: #e53935;
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    #login-container, #app-container {
+        padding: 20px;
+    }
+    input, button {
+        font-size: 14px;
+    }
 }
 
