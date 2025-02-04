@@ -13,8 +13,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const clockInBtn = document.getElementById('clock-in-btn');
     const clockOutBtn = document.getElementById('clock-out-btn');
     const logoutBtn = document.getElementById('logout-btn');
-    const userNameSpan = document.getElementById('user-name');
-    const userPhoto = document.getElementById('user-photo');
     const modalMessage = document.getElementById('modal-message');
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('close-modal');
@@ -26,6 +24,33 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     function hideModal() {
         modal.style.display = 'none';
+    }
+
+    async function getLocation() {
+        return new Promise((resolve, reject) => {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
+                    error => {
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                reject('No has permitido acceder a tu ubicación.');
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                reject('Ubicación no disponible.');
+                                break;
+                            case error.TIMEOUT:
+                                reject('Tiempo de espera agotado.');
+                                break;
+                            default:
+                                reject('Error desconocido al obtener la ubicación.');
+                        }
+                    }
+                );
+            } else {
+                reject('Geolocalización no soportada en este navegador.');
+            }
+        });
     }
 
     async function loginUser(email, password) {
@@ -42,76 +67,17 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function checkUserProfile(userId, email) {
         const profile = await getUserProfile(userId);
         if (!profile || !profile.name || !profile.photo_url) {
-            showProfileModal(userId, email);
-        } else {
-            showAppView(profile.name, profile.photo_url);
+            showModal('Debes completar tu perfil antes de continuar.');
         }
     }
 
     async function getUserProfile(userId) {
         const { data, error } = await supabase
             .from('socorristas')
-            .select('name, photo_url, email')
+            .select('name, photo_url')
             .eq('id', userId)
             .single();
         return error ? null : data;
-    }
-
-    function showProfileModal(userId, email) {
-        const profileModal = document.createElement('div');
-        profileModal.innerHTML = `
-            <h3>Completa tu perfil</h3>
-            <input type="text" id="profile-name" placeholder="Nombre Completo" required>
-            <input type="email" id="profile-email" value="${email}" placeholder="Correo Electrónico" required>
-            <input type="file" id="profile-photo" accept="image/*" required>
-            <button id="save-profile">Guardar</button>
-        `;
-        document.body.appendChild(profileModal);
-
-        document.getElementById('save-profile').addEventListener('click', async () => {
-            const name = document.getElementById('profile-name').value;
-            const email = document.getElementById('profile-email').value;
-            const photo = document.getElementById('profile-photo').files[0];
-
-            if (!name || !email || !photo) {
-                showModal('Por favor, completa todos los campos.');
-                return;
-            }
-
-            const { data: fileData, error: fileError } = await supabase
-                .storage
-                .from('avatars')
-                .upload(`public/${userId}-${Date.now()}`, photo);
-
-            if (fileError) {
-                showModal('Error al subir la foto: ' + fileError.message);
-                return;
-            }
-
-            const photoUrl = fileData?.path;
-
-            const { error } = await supabase
-                .from('socorristas')
-                .upsert({ id: userId, name, email, photo_url: photoUrl });
-
-            if (error) {
-                showModal('Error al guardar el perfil: ' + error.message);
-            } else {
-                showModal('Perfil guardado correctamente.');
-                profileModal.remove();
-                showAppView(name, photoUrl);
-            }
-        });
-    }
-
-    function showAppView(name, photoUrl) {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
-        userNameSpan.textContent = name;
-        if (photoUrl) {
-            userPhoto.src = `${supabaseUrl}/storage/v1/object/public/avatars/${photoUrl}`;
-            userPhoto.style.display = 'block';
-        }
     }
 
     async function clockInOrOut(isClockIn) {
@@ -120,7 +86,6 @@ document.addEventListener('DOMContentLoaded', async function () {
 
         const profile = await getUserProfile(user.id);
         if (!profile || !profile.name || !profile.photo_url) {
-            showProfileModal(user.id);
             return showModal('Debes completar tu perfil antes de fichar.');
         }
 
