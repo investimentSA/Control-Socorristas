@@ -3,35 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aplicación de Socorristas</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/supabase.min.js"></script> <!-- CDN de supabase -->
+    <title>App de Registro</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <h1>Bienvenido a la App de Socorristas</h1>
-        <div id="login-container">
-            <input type="email" id="email" placeholder="Correo Electrónico" required>
-            <input type="password" id="password" placeholder="Contraseña" required>
-            <button id="login-btn">Iniciar sesión</button>
-            <button id="register-btn">Registrar cuenta</button>
-        </div>
+    <div id="login-container">
+        <input type="email" id="email" placeholder="Email" required>
+        <input type="password" id="password" placeholder="Password" required>
+        <button id="login-btn">Iniciar sesión</button>
+        <button id="register-btn">Registrarse</button>
+    </div>
+    
+    <div id="app-container" style="display:none;">
+        <p>Bienvenido, <span id="user-name"></span></p>
+        <p>Ubicación: <span id="user-location"></span></p>
+        <button id="clock-in-btn">Fichar Entrada</button>
+        <button id="clock-out-btn">Fichar Salida</button>
+    </div>
 
-        <div id="app-container" style="display: none;">
-            <h2>Bienvenido, <span id="user-name"></span></h2>
-            <button id="clock-in-btn">Fichar Entrada</button>
-            <button id="clock-out-btn">Fichar Salida</button>
-            <div id="location">Ubicación: <span id="user-location"></span></div>
-        </div>
-
-        <!-- Modal -->
-        <div id="modal" class="modal">
-            <div class="modal-content">
-                <span id="modal-message"></span>
-                <button id="close-modal">Cerrar</button>
-            </div>
+    <div id="modal" style="display:none;">
+        <div>
+            <span id="modal-message"></span>
+            <button id="close-modal">Cerrar</button>
         </div>
     </div>
+
+    <!-- Cargar Supabase antes que cualquier otro script -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.js"></script>
+
+    <!-- Tu script que utiliza Supabase debe estar después -->
     <script src="app.js"></script>
 </body>
 </html>
