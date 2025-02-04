@@ -31,6 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
+            clearUserFichajes(data.user.id);  // Eliminar los registros de fichaje al iniciar sesión
             checkUserProfile(data.user.id, email);  // Pasamos el email al comprobar el perfil
         }
     }
@@ -154,9 +155,24 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function checkUserSession() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+            clearUserFichajes(user.id);  // Limpiar fichajes al iniciar sesión
             checkUserProfile(user.id, user.email);  // Añadido email a la comprobación
         } else {
             showLoginView();
+        }
+    }
+
+    async function clearUserFichajes(userId) {
+        // Eliminar todos los registros de fichajes de este usuario
+        const { error } = await supabase
+            .from('attendance')
+            .delete()
+            .eq('user_id', userId);
+
+        if (error) {
+            console.log('Error al eliminar los fichajes anteriores:', error.message);
+        } else {
+            console.log('Fichajes anteriores eliminados correctamente.');
         }
     }
 
@@ -254,3 +270,4 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     checkUserSession(); // Verificar la sesión al cargar la página
 });
+
