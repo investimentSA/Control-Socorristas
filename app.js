@@ -74,15 +74,26 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // Función actualizada con manejo de errores mejorado
     async function getLocation() {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
-                    error => reject('Error obteniendo la ubicación: ' + error.message)
+                    error => {
+                        if (error.code === error.PERMISSION_DENIED) {
+                            reject('No has permitido acceder a tu ubicación. Por favor, habilita la geolocalización.');
+                        } else if (error.code === error.POSITION_UNAVAILABLE) {
+                            reject('La ubicación no está disponible. Intenta nuevamente.');
+                        } else if (error.code === error.TIMEOUT) {
+                            reject('La solicitud de geolocalización ha tardado demasiado. Intenta nuevamente.');
+                        } else {
+                            reject('Error desconocido al obtener la ubicación.');
+                        }
+                    }
                 );
             } else {
-                reject('Geolocalización no soportada.');
+                reject('Geolocalización no soportada en este navegador.');
             }
         });
     }
