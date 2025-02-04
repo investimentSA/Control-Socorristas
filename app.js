@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';  // Usa variables de entorno en producción
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...';  // Usa variables de entorno en producción
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     // Referencias a los elementos HTML
@@ -31,8 +31,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            clearUserFichajes(data.user.id);  // Eliminar los registros de fichaje al iniciar sesión
-            checkUserProfile(data.user.id, email);  // Pasamos el email al comprobar el perfil
+            checkUserProfile(data.user.id, email);
         }
     }
 
@@ -65,75 +64,67 @@ document.addEventListener('DOMContentLoaded', async function () {
                     .from('attendance')
                     .select('*')
                     .eq('user_id', user.id)
-                    .is('clock_out', null); // Buscar registros de entrada sin salida
+                    .is('clock_out', null);
 
                 if (fetchError) throw fetchError;
 
                 if (existingClockInRecords.length > 0) {
-                    // Si ya existe un registro de entrada sin salida, no se puede fichar otra vez
-                    showModal('Ya tienes un registro de entrada sin fichar salida. Espera a fichar salida.');
+                    showModal('Ya tienes un fichaje de entrada sin salida.');
                     return;
                 }
 
-                // Registrar el fichaje de entrada
+                // Registrar fichaje de entrada
                 await supabase.from('attendance').insert([{ user_id: user.id, clock_in: new Date().toISOString(), location }]);
                 showModal('Fichaje de entrada correcto.');
             } else {
-                // Buscar un registro de entrada sin salida para fichar la salida
+                // Buscar el último registro de entrada sin salida
                 const { data: attendanceRecords, error } = await supabase
                     .from('attendance')
                     .select('*')
                     .eq('user_id', user.id)
-                    .is('clock_out', null); // Buscar registros de entrada sin salida
+                    .is('clock_out', null);
 
                 if (error) throw error;
 
                 if (attendanceRecords.length === 0) {
-                    showModal('No se encontró un registro de entrada para fichar la salida.');
+                    showModal('No tienes un fichaje de entrada para registrar la salida.');
                     return;
                 }
 
-                if (attendanceRecords.length > 1) {
-                    showModal('Hay múltiples registros de entrada sin fichar salida. Contacta con soporte.');
-                    return;
-                }
-
-                // Actualizamos el primer registro de entrada encontrado
+                // Actualizar el fichaje de salida
                 const { error: updateError } = await supabase
                     .from('attendance')
                     .update({ clock_out: new Date().toISOString(), location })
-                    .eq('id', attendanceRecords[0].id)  // Actualizar el registro con ese `id`
-                    .single();
+                    .eq('id', attendanceRecords[0].id);
 
                 if (updateError) throw updateError;
 
                 showModal('Fichaje de salida correcto.');
             }
         } catch (err) {
-            console.log('Error al fichar:', err); // Imprimir error completo en consola
-            if (err.message) {
-                showModal('Error al fichar: ' + err.message);
-            } else {
-                showModal('Error desconocido al fichar.');
-            }
+            console.log('Error al fichar:', err);
+            showModal('Error al fichar: ' + (err.message || 'desconocido.'));
         }
     }
 
-    // Función actualizada con manejo de errores mejorado
     async function getLocation() {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
                     error => {
-                        if (error.code === error.PERMISSION_DENIED) {
-                            reject('No has permitido acceder a tu ubicación. Por favor, habilita la geolocalización.');
-                        } else if (error.code === error.POSITION_UNAVAILABLE) {
-                            reject('La ubicación no está disponible. Intenta nuevamente.');
-                        } else if (error.code === error.TIMEOUT) {
-                            reject('La solicitud de geolocalización ha tardado demasiado. Intenta nuevamente.');
-                        } else {
-                            reject('Error desconocido al obtener la ubicación.');
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                reject('No has permitido acceder a tu ubicación.');
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                reject('Ubicación no disponible.');
+                                break;
+                            case error.TIMEOUT:
+                                reject('Tiempo de espera agotado.');
+                                break;
+                            default:
+                                reject('Error desconocido.');
                         }
                     }
                 );
@@ -155,31 +146,16 @@ document.addEventListener('DOMContentLoaded', async function () {
     async function checkUserSession() {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
-            clearUserFichajes(user.id);  // Limpiar fichajes al iniciar sesión
-            checkUserProfile(user.id, user.email);  // Añadido email a la comprobación
+            checkUserProfile(user.id, user.email);
         } else {
             showLoginView();
-        }
-    }
-
-    async function clearUserFichajes(userId) {
-        // Eliminar todos los registros de fichajes de este usuario
-        const { error } = await supabase
-            .from('attendance')
-            .delete()
-            .eq('user_id', userId);
-
-        if (error) {
-            console.log('Error al eliminar los fichajes anteriores:', error.message);
-        } else {
-            console.log('Fichajes anteriores eliminados correctamente.');
         }
     }
 
     async function checkUserProfile(userId, email) {
         const profile = await getUserProfile(userId);
         if (!profile || !profile.name || !profile.photo_url) {
-            showProfileModal(userId, email);  // Aseguramos que email esté disponible
+            showProfileModal(userId, email);
         } else {
             showAppView(profile.name, profile.photo_url);
         }
@@ -215,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
-            // Subir la foto a Supabase Storage
+            // Subir foto a Supabase Storage
             const { data: fileData, error: fileError } = await supabase
                 .storage
                 .from('avatars')
@@ -226,9 +202,9 @@ document.addEventListener('DOMContentLoaded', async function () {
                 return;
             }
 
-            const photoUrl = fileData?.path; // URL del archivo subido
+            const photoUrl = fileData?.path;
 
-            // Actualizar el perfil del usuario en la base de datos
+            // Guardar perfil en la base de datos
             const { error } = await supabase
                 .from('socorristas')
                 .upsert({ id: userId, name, email, photo_url: photoUrl });
@@ -256,11 +232,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     function showLoginView() {
         document.getElementById('login-container').style.display = 'block';
         document.getElementById('app-container').style.display = 'none';
-        userNameSpan.textContent = '';
-        userPhoto.style.display = 'none';
     }
 
-    // Eventos
     loginBtn.addEventListener('click', () => loginUser(emailInput.value, passwordInput.value));
     registerBtn.addEventListener('click', () => registerUser(emailInput.value, passwordInput.value));
     clockInBtn.addEventListener('click', () => clockInOrOut(true));
@@ -268,6 +241,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     logoutBtn.addEventListener('click', logoutUser);
     closeModal.addEventListener('click', hideModal);
 
-    checkUserSession(); // Verificar la sesión al cargar la página
+    checkUserSession();
 });
 
