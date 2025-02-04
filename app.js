@@ -19,6 +19,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('close-modal');
 
+    function showModal(message) {
+        modalMessage.textContent = message;
+        modal.style.display = 'block';
+    }
+
+    function hideModal() {
+        modal.style.display = 'none';
+    }
+
     async function loginUser(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
@@ -27,6 +36,81 @@ document.addEventListener('DOMContentLoaded', async function () {
             hasClockedIn = false;
             hasClockedOut = false;
             checkUserProfile(data.user.id, email);
+        }
+    }
+
+    async function checkUserProfile(userId, email) {
+        const profile = await getUserProfile(userId);
+        if (!profile || !profile.name || !profile.photo_url) {
+            showProfileModal(userId, email);
+        } else {
+            showAppView(profile.name, profile.photo_url);
+        }
+    }
+
+    async function getUserProfile(userId) {
+        const { data, error } = await supabase
+            .from('socorristas')
+            .select('name, photo_url, email')
+            .eq('id', userId)
+            .single();
+        return error ? null : data;
+    }
+
+    function showProfileModal(userId, email) {
+        const profileModal = document.createElement('div');
+        profileModal.innerHTML = `
+            <h3>Completa tu perfil</h3>
+            <input type="text" id="profile-name" placeholder="Nombre Completo" required>
+            <input type="email" id="profile-email" value="${email}" placeholder="Correo Electrónico" required>
+            <input type="file" id="profile-photo" accept="image/*" required>
+            <button id="save-profile">Guardar</button>
+        `;
+        document.body.appendChild(profileModal);
+
+        document.getElementById('save-profile').addEventListener('click', async () => {
+            const name = document.getElementById('profile-name').value;
+            const email = document.getElementById('profile-email').value;
+            const photo = document.getElementById('profile-photo').files[0];
+
+            if (!name || !email || !photo) {
+                showModal('Por favor, completa todos los campos.');
+                return;
+            }
+
+            const { data: fileData, error: fileError } = await supabase
+                .storage
+                .from('avatars')
+                .upload(`public/${userId}-${Date.now()}`, photo);
+
+            if (fileError) {
+                showModal('Error al subir la foto: ' + fileError.message);
+                return;
+            }
+
+            const photoUrl = fileData?.path;
+
+            const { error } = await supabase
+                .from('socorristas')
+                .upsert({ id: userId, name, email, photo_url: photoUrl });
+
+            if (error) {
+                showModal('Error al guardar el perfil: ' + error.message);
+            } else {
+                showModal('Perfil guardado correctamente.');
+                profileModal.remove();
+                showAppView(name, photoUrl);
+            }
+        });
+    }
+
+    function showAppView(name, photoUrl) {
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        userNameSpan.textContent = name;
+        if (photoUrl) {
+            userPhoto.src = `${supabaseUrl}/storage/v1/object/public/avatars/${photoUrl}`;
+            userPhoto.style.display = 'block';
         }
     }
 
