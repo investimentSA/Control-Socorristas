@@ -40,7 +40,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            showAppView(data.user.email);
+            // Comprobar si el perfil está completo
+            checkUserProfile(data.user.id);
         }
     }
 
@@ -133,16 +134,101 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
-    function showAppView(email) {
+    function showAppView(email, name, photoUrl) {
         document.getElementById('login-container').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
-        userNameSpan.textContent = email;
+        userNameSpan.textContent = name || email;
+        // Mostrar foto de perfil si está disponible
+        if (photoUrl) {
+            const userPhoto = document.getElementById('user-photo');
+            userPhoto.src = photoUrl;
+        }
     }
 
     function showLoginView() {
         document.getElementById('login-container').style.display = 'block';
         document.getElementById('app-container').style.display = 'none';
         userNameSpan.textContent = '';
+    }
+
+    async function checkUserSession() {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            checkUserProfile(user.id);
+        } else {
+            showLoginView();
+        }
+    }
+
+    async function checkUserProfile(userId) {
+        const { data: profile, error } = await supabase
+            .from('socorristas')
+            .select('name, photo_url')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            showModal('Error al cargar el perfil: ' + error.message);
+            return;
+        }
+
+        // Si el perfil no está completo, mostrar formulario
+        if (!profile || !profile.name || !profile.photo_url) {
+            showProfileModal();
+        } else {
+            showAppView(profile.name, profile.photo_url);
+        }
+    }
+
+    function showProfileModal() {
+        const profileModal = document.createElement('div');
+        profileModal.innerHTML = `
+            <h3>Completa tu perfil</h3>
+            <input type="text" id="profile-name" placeholder="Nombre Completo" required>
+            <input type="file" id="profile-photo" accept="image/*" required>
+            <button id="save-profile">Guardar</button>
+        `;
+        document.body.appendChild(profileModal);
+
+        document.getElementById('save-profile').addEventListener('click', async () => {
+            const name = document.getElementById('profile-name').value;
+            const photo = document.getElementById('profile-photo').files[0];
+
+            if (!name || !photo) {
+                showModal('Por favor, completa todos los campos.');
+                return;
+            }
+
+            // Subir la foto a Supabase Storage
+            const { data: fileData, error: fileError } = await supabase
+                .storage
+                .from('avatars')
+                .upload(`public/${name}-${Date.now()}`, photo);
+
+            if (fileError) {
+                showModal('Error al subir la foto: ' + fileError.message);
+                return;
+            }
+
+            const photoUrl = fileData?.Key;  // URL del archivo subido
+
+            // Actualizar el perfil del usuario en la base de datos
+            const { error } = await supabase
+                .from('socorristas')
+                .upsert({
+                    id: user.id,
+                    name,
+                    photo_url: photoUrl
+                });
+
+            if (error) {
+                showModal('Error al guardar el perfil: ' + error.message);
+            } else {
+                showModal('Perfil guardado correctamente.');
+                profileModal.remove();
+                showAppView(name, photoUrl);
+            }
+        });
     }
 
     loginBtn.addEventListener('click', () => loginUser(emailInput.value, passwordInput.value));
@@ -152,11 +238,5 @@ document.addEventListener('DOMContentLoaded', async function () {
     logoutBtn.addEventListener('click', logoutUser);
     closeModal.addEventListener('click', hideModal);
 
-    async function checkUserSession() {
-        const { data: { user } } = await supabase.auth.getUser();
-        user ? showAppView(user.email) : showLoginView();
-    }
-
     checkUserSession();
 });
-
