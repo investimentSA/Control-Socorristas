@@ -1,131 +1,130 @@
-// Inicializar Supabase correctamente
-const supabaseUrl = 'https://<tu-supabase-url>.supabase.co'; // Reemplaza con tu URL de Supabase
-const supabaseKey = '<tu-supabase-api-key>'; // Reemplaza con tu clave de API de Supabase
-const supabase = supabase.createClient(supabaseUrl, supabaseKey); // Asegúrate de inicializarlo aquí
+// Configura Supabase con tu URL y clave
+const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; 
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; 
+const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Elementos del DOM
-const loginContainer = document.getElementById('login-container');
-const socorristaContainer = document.getElementById('socorrista-container');
+// Variables de los elementos de la interfaz
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
 const loginBtn = document.getElementById('login-btn');
 const registerBtn = document.getElementById('register-btn');
-const checkInBtn = document.getElementById('check-in');
-const checkOutBtn = document.getElementById('check-out');
-const locationDisplay = document.getElementById('location');
-const messageDisplay = document.getElementById('message');
+const clockInBtn = document.getElementById('clock-in-btn');
+const clockOutBtn = document.getElementById('clock-out-btn');
+const locationSpan = document.getElementById('user-location');
+const userNameSpan = document.getElementById('user-name');
+const modalMessage = document.getElementById('modal-message');
+const modal = document.getElementById('modal');
+const closeModal = document.getElementById('close-modal');
 
-// Verificar si el usuario está logueado
-let currentUser = null;
+// Funciones para mostrar/ocultar modales
+function showModal(message) {
+    modalMessage.textContent = message;
+    modal.style.display = 'block';
+}
 
-// Obtener la ubicación actual del usuario
-async function getLocation() {
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(position => {
-            const latitude = position.coords.latitude;
-            const longitude = position.coords.longitude;
-            locationDisplay.textContent = `${latitude}, ${longitude}`;
-            return { latitude, longitude };
-        }, error => {
-            locationDisplay.textContent = "Error al obtener la ubicación.";
-        });
+function hideModal() {
+    modal.style.display = 'none';
+}
+
+// Función para registrar un nuevo usuario
+async function registerUser(email, password) {
+    const { user, error } = await supabase.auth.signUp({ email, password });
+    if (error) {
+        showModal('Error al registrar: ' + error.message);
     } else {
-        locationDisplay.textContent = "Geolocalización no soportada.";
+        showModal('¡Registro exitoso! Revisa tu correo para verificar.');
     }
 }
 
-// Registrar un nuevo usuario
-registerBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
-
-    if (email && password) {
-        const { data, error } = await supabase.auth.signUp({
-            email: email,
-            password: password
-        });
-
-        if (error) {
-            messageDisplay.textContent = `Error: ${error.message}`;
-        } else {
-            messageDisplay.textContent = `¡Registro exitoso! Revisa tu correo para confirmar la cuenta.`;
-        }
+// Función para iniciar sesión
+async function loginUser(email, password) {
+    const { user, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+        showModal('Error al iniciar sesión: ' + error.message);
     } else {
-        messageDisplay.textContent = "Por favor ingresa el correo y la contraseña.";
+        document.getElementById('login-container').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        userNameSpan.textContent = user.email;
+        getLocation();  // Obtener ubicación del usuario
     }
-});
+}
 
-// Iniciar sesión
-loginBtn.addEventListener('click', async () => {
-    const email = emailInput.value;
-    const password = passwordInput.value;
+// Función para fichar entrada
+async function clockIn() {
+    const location = await getLocation();
+    const { data, error } = await supabase
+        .from('attendance')
+        .insert([{ user_email: supabase.auth.user().email, clock_in: new Date(), location }]);
 
-    if (email && password) {
-        const { data, error } = await supabase.auth.signInWithPassword({
-            email: email,
-            password: password
-        });
-
-        if (error) {
-            messageDisplay.textContent = `Error: ${error.message}`;
-        } else {
-            currentUser = data.user;
-            loginContainer.style.display = 'none';
-            socorristaContainer.style.display = 'block';
-            messageDisplay.textContent = `Bienvenido, ${data.user.email}`;
-            getLocation(); // Mostrar ubicación actual
-        }
+    if (error) {
+        showModal('Error al fichar entrada: ' + error.message);
     } else {
-        messageDisplay.textContent = "Por favor ingresa el correo y la contraseña.";
+        showModal('Fichado correctamente a la entrada.');
     }
-});
+}
 
-// Fichar entrada
-checkInBtn.addEventListener('click', async () => {
-    if (currentUser) {
-        const location = await getLocation(); // Obtener ubicación
-        const horaEntrada = new Date().toISOString();
+// Función para fichar salida
+async function clockOut() {
+    const location = await getLocation();
+    const { data, error } = await supabase
+        .from('attendance')
+        .update({ clock_out: new Date(), location })
+        .match({ user_email: supabase.auth.user().email, clock_out: null });
 
-        const { data, error } = await supabase
-            .from('socorristas')
-            .upsert([
-                {
-                    id: currentUser.id, // Usa el ID de usuario de Supabase
-                    nombre: currentUser.email,
-                    hora_entrada: horaEntrada,
-                    latitude: location.latitude,
-                    longitude: location.longitude
+    if (error) {
+        showModal('Error al fichar salida: ' + error.message);
+    } else {
+        showModal('Fichado correctamente a la salida.');
+    }
+}
+
+// Función para obtener ubicación usando geolocalización
+function getLocation() {
+    return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                position => {
+                    const location = `${position.coords.latitude}, ${position.coords.longitude}`;
+                    locationSpan.textContent = location;
+                    resolve(location);
+                },
+                error => {
+                    reject('Error al obtener ubicación');
                 }
-            ]);
-
-        if (error) {
-            messageDisplay.textContent = `Error: ${error.message}`;
+            );
         } else {
-            messageDisplay.textContent = `¡Hora de entrada registrada a las ${horaEntrada}!`;
+            reject('Geolocalización no soportada');
         }
-    }
+    });
+}
+
+// Eventos de los botones
+loginBtn.addEventListener('click', () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    loginUser(email, password);
 });
 
-// Fichar salida
-checkOutBtn.addEventListener('click', async () => {
-    if (currentUser) {
-        const location = await getLocation(); // Obtener ubicación
-        const horaSalida = new Date().toISOString();
-
-        const { data, error } = await supabase
-            .from('socorristas')
-            .update({
-                hora_salida: horaSalida,
-                latitude: location.latitude,
-                longitude: location.longitude
-            })
-            .eq('id', currentUser.id);
-
-        if (error) {
-            messageDisplay.textContent = `Error: ${error.message}`;
-        } else {
-            messageDisplay.textContent = `¡Hora de salida registrada a las ${horaSalida}!`;
-        }
-    }
+registerBtn.addEventListener('click', () => {
+    const email = emailInput.value;
+    const password = passwordInput.value;
+    registerUser(email, password);
 });
 
+clockInBtn.addEventListener('click', () => {
+    clockIn();
+});
+
+clockOutBtn.addEventListener('click', () => {
+    clockOut();
+});
+
+closeModal.addEventListener('click', hideModal);
+
+// Si ya está autenticado, mostrar la vista de la app
+if (supabase.auth.user()) {
+    document.getElementById('login-container').style.display = 'none';
+    document.getElementById('app-container').style.display = 'block';
+    userNameSpan.textContent = supabase.auth.user().email;
+    getLocation();
+}
