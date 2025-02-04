@@ -70,7 +70,12 @@ document.addEventListener('DOMContentLoaded', async function () {
                 showModal('Fichado de salida correcto.');
             }
         } catch (err) {
-            showModal('Error al fichar: ' + err);
+            console.log('Error al fichar:', err); // Imprimir error completo en consola
+            if (err.message) {
+                showModal('Error al fichar: ' + err.message);
+            } else {
+                showModal('Error desconocido al fichar.');
+            }
         }
     }
 
