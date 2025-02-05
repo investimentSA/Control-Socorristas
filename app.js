@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const SUPABASE_URL = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ Reemplázalo con una variable segura en producción
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ Usa variables seguras en producción
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let hasClockedIn = localStorage.getItem('hasClockedIn') === 'true';
@@ -38,21 +38,32 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function registerUser(email, password) {
         const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) return showModal(`Error al registrarse: ${error.message}`);
+        if (error) {
+            console.error('Error al registrarse:', error);
+            return showModal(`Error al registrarse: ${error.message}`);
+        }
 
         const user = data.user;
         if (user) {
-            const { error: profileError } = await supabase.from('socorristas').insert([
-                { id: user.id, email, name: 'Usuario Nuevo', photo_url: '' }
-            ]);
-            if (profileError) return showModal(`Error al crear perfil: ${profileError.message}`);
+            const { error: profileError } = await supabase
+                .from('socorristas')
+                .insert([{ id: user.id, email, name: 'Usuario Nuevo', photo_url: '' }]);
+
+            if (profileError) {
+                console.error('Error al crear perfil:', profileError);
+                return showModal(`Error al crear perfil: ${profileError.message}`);
+            }
+
             showModal('Registro exitoso. Ahora inicia sesión.');
         }
     }
 
     async function loginUser(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return showModal(`Error al iniciar sesión: ${error.message}`);
+        if (error) {
+            console.error('Error al iniciar sesión:', error);
+            return showModal(`Error al iniciar sesión: ${error.message}`);
+        }
 
         const user = data.user;
         if (user) {
@@ -72,13 +83,26 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     async function getUserProfile(userId) {
-        const { data, error } = await supabase.from('socorristas').select('name, photo_url').eq('id', userId).single();
-        return error ? null : data;
+        const { data, error } = await supabase
+            .from('socorristas')
+            .select('name, photo_url')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            console.error('Error obteniendo perfil:', error);
+            return null;
+        }
+
+        return data;
     }
 
     async function clockInOrOut(isClockIn) {
         const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) return showModal('No hay usuario autenticado.');
+        if (error || !user) {
+            console.error('Error obteniendo usuario:', error);
+            return showModal('No hay usuario autenticado.');
+        }
 
         const profile = await getUserProfile(user.id);
         if (!profile || !profile.name) return showModal('Debes completar tu perfil antes de fichar.');
@@ -87,16 +111,31 @@ document.addEventListener('DOMContentLoaded', async function () {
             const location = await getLocation();
             if (isClockIn) {
                 if (hasClockedIn) return showModal('Ya has fichado entrada en esta sesión.');
-                await supabase.from('attendance').insert([{ user_id: user.id, clock_in: new Date().toISOString(), location }]);
+
+                await supabase.from('attendance').insert([
+                    { user_id: user.id, clock_in: new Date().toISOString(), location }
+                ]);
+
                 hasClockedIn = true;
                 localStorage.setItem('hasClockedIn', 'true');
                 showModal('Fichaje de entrada correcto.');
             } else {
                 if (!hasClockedIn) return showModal('Debes fichar entrada antes de fichar salida.');
                 if (hasClockedOut) return showModal('Ya has fichado salida en esta sesión.');
-                const { data: attendanceRecords, error } = await supabase.from('attendance').select('id').eq('user_id', user.id).is('clock_out', null).single();
+
+                const { data: attendanceRecords, error } = await supabase
+                    .from('attendance')
+                    .select('id')
+                    .eq('user_id', user.id)
+                    .is('clock_out', null)
+                    .single();
+
                 if (error || !attendanceRecords) return showModal('No tienes una entrada sin salida.');
-                await supabase.from('attendance').update({ clock_out: new Date().toISOString(), location }).eq('id', attendanceRecords.id);
+
+                await supabase.from('attendance')
+                    .update({ clock_out: new Date().toISOString(), location })
+                    .eq('id', attendanceRecords.id);
+
                 hasClockedOut = true;
                 localStorage.setItem('hasClockedOut', 'true');
                 showModal('Fichaje de salida correcto.');
