@@ -1,7 +1,9 @@
+import { createClient } from '@supabase/supabase-js';
+
 document.addEventListener('DOMContentLoaded', async function () {
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
-    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
@@ -10,7 +12,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const clockInBtn = document.getElementById('clock-in-btn');
     const clockOutBtn = document.getElementById('clock-out-btn');
     const logoutBtn = document.getElementById('logout-btn');
-    const locationSpan = document.getElementById('user-location');
     const userNameSpan = document.getElementById('user-name');
     const modalMessage = document.getElementById('modal-message');
     const modal = document.getElementById('modal');
@@ -31,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al registrar: ' + error.message);
         } else {
-            showModal('¡Registro exitoso!');
+            showModal('¡Registro exitoso! Ahora inicia sesión.');
         }
     }
 
@@ -58,14 +59,13 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!user) return showModal('No hay usuario autenticado.');
         
         try {
-            // Solo obtenemos la ubicación sin mostrar el modal de error
             const location = await getLocation();
             await supabase.from('attendance').insert([{
                 user_id: user.id,  
                 clock_in: new Date().toISOString(),
                 location
             }]);
-            showModal('Fichado correctamente.');  // Mostrar mensaje de éxito sin error
+            showModal('Fichado correctamente.');
         } catch (err) {
             showModal('Error al obtener ubicación: ' + err);
         }
@@ -76,12 +76,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (!user) return showModal('No hay usuario autenticado.');
         
         try {
-            // Solo obtenemos la ubicación sin mostrar el modal de error
             const location = await getLocation();
-            const { error } = await supabase.from('attendance').update({
-                clock_out: new Date().toISOString(),
-                location
-            }).eq('user_id', user.id).is('clock_out', null);
+            const { data, error } = await supabase.from('attendance')
+                .update({ clock_out: new Date().toISOString(), location })
+                .eq('user_id', user.id)
+                .eq('clock_out', null);
 
             if (error) {
                 showModal('Error al fichar salida: ' + error.message);
@@ -98,15 +97,14 @@ document.addEventListener('DOMContentLoaded', async function () {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(
                     position => {
-                        // Mostrar ubicación en el mapa de Google
                         const latitude = position.coords.latitude;
                         const longitude = position.coords.longitude;
-                        resolve(${latitude}, ${longitude});
+                        resolve(`${latitude}, ${longitude}`);
                         showMap(latitude, longitude);
                     },
                     (error) => {
                         if (error.code === error.PERMISSION_DENIED) {
-                            reject('El permiso de ubicación ha sido denegado. Por favor, habilita la geolocalización en tu navegador.');
+                            reject('El permiso de ubicación ha sido denegado. Habilítalo en tu navegador.');
                         } else {
                             reject('Error al obtener ubicación: ' + error.message);
                         }
