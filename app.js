@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const SUPABASE_URL = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const SUPABASE_KEY = 'TU_CLAVE_AQUI'; // ⚠️ Reemplázalo con una variable segura en producción
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ Reemplázalo con una variable segura en producción
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let hasClockedIn = localStorage.getItem('hasClockedIn') === 'true';
