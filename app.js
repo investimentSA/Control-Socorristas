@@ -1,11 +1,14 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const SUPABASE_URL = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ Usa variables seguras en producción
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ✅ Asegurar que `supabase` se inicializa correctamente antes de usarse
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let hasClockedIn = localStorage.getItem('hasClockedIn') === 'true';
     let hasClockedOut = localStorage.getItem('hasClockedOut') === 'true';
 
+    // ✅ Esperar a que el DOM cargue antes de buscar los elementos
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const loginBtn = document.getElementById('login-btn');
