@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ No expongas tu clave en producción
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ Reemplázalo con una variable segura en producción
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     let hasClockedIn = localStorage.getItem('hasClockedIn') === 'true';
@@ -37,6 +37,22 @@ document.addEventListener('DOMContentLoaded', async function () {
         });
     }
 
+    async function registerUser(email, password) {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) return showModal(`Error al registrarse: ${error.message}`);
+
+        const user = data.user;
+        if (user) {
+            // Crear perfil en la tabla `socorristas`
+            const { error: profileError } = await supabase
+                .from('socorristas')
+                .insert([{ id: user.id, email, name: '', photo_url: '' }]);
+
+            if (profileError) return showModal(`Error al crear perfil: ${profileError.message}`);
+            showModal('Registro exitoso. Ahora inicia sesión.');
+        }
+    }
+
     async function loginUser(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) return showModal(`Error al iniciar sesión: ${error.message}`);
@@ -53,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function checkUserProfile(userId) {
         const profile = await getUserProfile(userId);
-        if (!profile || !profile.name || !profile.photo_url) {
+        if (!profile || !profile.name) {
             showModal('Debes completar tu perfil antes de continuar.');
         }
     }
@@ -69,13 +85,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     async function clockInOrOut(isClockIn) {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return showModal('No hay usuario autenticado.');
+        const { data: { user }, error } = await supabase.auth.getUser();
+        if (error || !user) return showModal('No hay usuario autenticado.');
 
         const profile = await getUserProfile(user.id);
-        if (!profile || !profile.name || !profile.photo_url) {
-            return showModal('Debes completar tu perfil antes de fichar.');
-        }
+        if (!profile || !profile.name) return showModal('Debes completar tu perfil antes de fichar.');
 
         try {
             const location = await getLocation();
@@ -125,8 +139,10 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     loginBtn.addEventListener('click', () => loginUser(emailInput.value, passwordInput.value));
+    registerBtn.addEventListener('click', () => registerUser(emailInput.value, passwordInput.value));
     clockInBtn.addEventListener('click', () => clockInOrOut(true));
     clockOutBtn.addEventListener('click', () => clockInOrOut(false));
     logoutBtn.addEventListener('click', logoutUser);
     closeModal.addEventListener('click', hideModal);
 });
+
