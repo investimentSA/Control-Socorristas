@@ -1,14 +1,17 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    const SUPABASE_URL = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ Usa variables seguras en producción
+    // ✅ Importar el SDK de Supabase correctamente
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-    // ✅ Asegurar que `supabase` se inicializa correctamente antes de usarse
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
+
+    // ✅ Inicializar Supabase correctamente
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let hasClockedIn = localStorage.getItem('hasClockedIn') === 'true';
     let hasClockedOut = localStorage.getItem('hasClockedOut') === 'true';
 
-    // ✅ Esperar a que el DOM cargue antes de buscar los elementos
+    // ✅ Esperar a que el DOM cargue antes de obtener los elementos
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
     const loginBtn = document.getElementById('login-btn');
@@ -19,6 +22,11 @@ document.addEventListener('DOMContentLoaded', async function () {
     const modalMessage = document.getElementById('modal-message');
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('close-modal');
+
+    if (!emailInput || !passwordInput || !loginBtn || !registerBtn || !clockInBtn || !clockOutBtn || !logoutBtn || !modal || !modalMessage || !closeModal) {
+        console.error('❌ Error: No se encontraron algunos elementos en el DOM.');
+        return;
+    }
 
     function showModal(message) {
         modalMessage.textContent = message;
