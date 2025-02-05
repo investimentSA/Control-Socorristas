@@ -1,10 +1,10 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
+    const supabaseKey = 'TU_SUPABASE_KEY_AQUÍ'; // ⚠️ No expongas tu clave en producción
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-    let hasClockedIn = false;
-    let hasClockedOut = false;
+    let hasClockedIn = localStorage.getItem('hasClockedIn') === 'true';
+    let hasClockedOut = localStorage.getItem('hasClockedOut') === 'true';
 
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
@@ -28,43 +28,30 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function getLocation() {
         return new Promise((resolve, reject) => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
-                    error => {
-                        switch (error.code) {
-                            case error.PERMISSION_DENIED:
-                                reject('No has permitido acceder a tu ubicación.');
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                reject('Ubicación no disponible.');
-                                break;
-                            case error.TIMEOUT:
-                                reject('Tiempo de espera agotado.');
-                                break;
-                            default:
-                                reject('Error desconocido al obtener la ubicación.');
-                        }
-                    }
-                );
-            } else {
-                reject('Geolocalización no soportada en este navegador.');
-            }
+            if (!navigator.geolocation) return reject('Geolocalización no soportada.');
+
+            navigator.geolocation.getCurrentPosition(
+                position => resolve(`${position.coords.latitude}, ${position.coords.longitude}`),
+                error => reject(`Error de geolocalización: ${error.message}`)
+            );
         });
     }
 
     async function loginUser(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            showModal('Error al iniciar sesión: ' + error.message);
-        } else {
+        if (error) return showModal(`Error al iniciar sesión: ${error.message}`);
+
+        const user = data.user;
+        if (user) {
             hasClockedIn = false;
             hasClockedOut = false;
-            checkUserProfile(data.user.id, email);
+            localStorage.setItem('hasClockedIn', 'false');
+            localStorage.setItem('hasClockedOut', 'false');
+            checkUserProfile(user.id);
         }
     }
 
-    async function checkUserProfile(userId, email) {
+    async function checkUserProfile(userId) {
         const profile = await getUserProfile(userId);
         if (!profile || !profile.name || !profile.photo_url) {
             showModal('Debes completar tu perfil antes de continuar.');
@@ -77,6 +64,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             .select('name, photo_url')
             .eq('id', userId)
             .single();
+
         return error ? null : data;
     }
 
@@ -93,60 +81,52 @@ document.addEventListener('DOMContentLoaded', async function () {
             const location = await getLocation();
 
             if (isClockIn) {
-                if (hasClockedIn) {
-                    showModal('Ya has registrado una entrada en esta sesión.');
-                    return;
-                }
+                if (hasClockedIn) return showModal('Ya has fichado entrada en esta sesión.');
 
                 await supabase.from('attendance').insert([{ user_id: user.id, clock_in: new Date().toISOString(), location }]);
                 hasClockedIn = true;
+                localStorage.setItem('hasClockedIn', 'true');
                 showModal('Fichaje de entrada correcto.');
             } else {
-                if (!hasClockedIn) {
-                    showModal('Debes fichar la entrada antes de fichar la salida.');
-                    return;
-                }
-                if (hasClockedOut) {
-                    showModal('Ya has registrado una salida en esta sesión.');
-                    return;
-                }
+                if (!hasClockedIn) return showModal('Debes fichar entrada antes de fichar salida.');
+                if (hasClockedOut) return showModal('Ya has fichado salida en esta sesión.');
 
                 const { data: attendanceRecords, error } = await supabase
                     .from('attendance')
-                    .select('*')
+                    .select('id')
                     .eq('user_id', user.id)
-                    .is('clock_out', null);
+                    .is('clock_out', null)
+                    .single();
 
-                if (error) throw error;
-
-                if (attendanceRecords.length === 0) {
-                    showModal('No tienes un fichaje de entrada para registrar la salida.');
-                    return;
-                }
+                if (error || !attendanceRecords) return showModal('No tienes una entrada sin salida.');
 
                 await supabase
                     .from('attendance')
                     .update({ clock_out: new Date().toISOString(), location })
-                    .eq('id', attendanceRecords[0].id);
+                    .eq('id', attendanceRecords.id);
 
                 hasClockedOut = true;
+                localStorage.setItem('hasClockedOut', 'true');
                 showModal('Fichaje de salida correcto.');
             }
         } catch (err) {
-            console.log('Error al fichar:', err);
-            showModal('Error al fichar: ' + (err.message || 'desconocido.'));
+            console.error('Error al fichar:', err);
+            showModal(`Error al fichar: ${err.message || 'desconocido'}`);
         }
     }
 
-    loginBtn.addEventListener('click', () => loginUser(emailInput.value, passwordInput.value));
-    registerBtn.addEventListener('click', () => registerUser(emailInput.value, passwordInput.value));
-    clockInBtn.addEventListener('click', () => clockInOrOut(true));
-    clockOutBtn.addEventListener('click', () => clockInOrOut(false));
-    logoutBtn.addEventListener('click', () => {
+    async function logoutUser() {
+        await supabase.auth.signOut();
         hasClockedIn = false;
         hasClockedOut = false;
-        logoutUser();
-    });
+        localStorage.setItem('hasClockedIn', 'false');
+        localStorage.setItem('hasClockedOut', 'false');
+        showModal('Sesión cerrada.');
+    }
 
+    loginBtn.addEventListener('click', () => loginUser(emailInput.value, passwordInput.value));
+    clockInBtn.addEventListener('click', () => clockInOrOut(true));
+    clockOutBtn.addEventListener('click', () => clockInOrOut(false));
+    logoutBtn.addEventListener('click', logoutUser);
     closeModal.addEventListener('click', hideModal);
 });
