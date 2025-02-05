@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const SUPABASE_URL = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // ⚠️ Usa variables seguras en producción
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; 
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let hasClockedIn = localStorage.getItem('hasClockedIn') === 'true';
@@ -38,10 +38,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function registerUser(email, password) {
         const { data, error } = await supabase.auth.signUp({ email, password });
-        if (error) {
-            console.error('Error al registrarse:', error);
-            return showModal(`Error al registrarse: ${error.message}`);
-        }
+        if (error) return showModal(`Error al registrarse: ${error.message}`);
 
         const user = data.user;
         if (user) {
@@ -49,10 +46,7 @@ document.addEventListener('DOMContentLoaded', async function () {
                 .from('socorristas')
                 .insert([{ id: user.id, email, name: 'Usuario Nuevo', photo_url: '' }]);
 
-            if (profileError) {
-                console.error('Error al crear perfil:', profileError);
-                return showModal(`Error al crear perfil: ${profileError.message}`);
-            }
+            if (profileError) return showModal(`Error al crear perfil: ${profileError.message}`);
 
             showModal('Registro exitoso. Ahora inicia sesión.');
         }
@@ -60,10 +54,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     async function loginUser(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) {
-            console.error('Error al iniciar sesión:', error);
-            return showModal(`Error al iniciar sesión: ${error.message}`);
-        }
+        if (error) return showModal(`Error al iniciar sesión: ${error.message}`);
 
         const user = data.user;
         if (user) {
@@ -71,41 +62,36 @@ document.addEventListener('DOMContentLoaded', async function () {
             hasClockedOut = false;
             localStorage.setItem('hasClockedIn', 'false');
             localStorage.setItem('hasClockedOut', 'false');
-            checkUserProfile(user.id);
+
+            // Verificar y crear el perfil si no existe
+            await checkUserProfile(user.id, email);
         }
     }
 
-    async function checkUserProfile(userId) {
-        const profile = await getUserProfile(userId);
-        if (!profile || !profile.name) {
-            showModal('Debes completar tu perfil antes de continuar.');
-        }
-    }
-
-    async function getUserProfile(userId) {
-        const { data, error } = await supabase
+    async function checkUserProfile(userId, email) {
+        const { data: profile, error } = await supabase
             .from('socorristas')
-            .select('name, photo_url')
+            .select('name')
             .eq('id', userId)
             .single();
 
-        if (error) {
-            console.error('Error obteniendo perfil:', error);
-            return null;
+        if (error || !profile) {
+            await supabase.from('socorristas').insert([{ id: userId, email, name: 'Usuario Nuevo', photo_url: '' }]);
+            showModal('Tu perfil ha sido creado automáticamente.');
         }
-
-        return data;
     }
 
     async function clockInOrOut(isClockIn) {
         const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
-            console.error('Error obteniendo usuario:', error);
-            return showModal('No hay usuario autenticado.');
-        }
+        if (error || !user) return showModal('No hay usuario autenticado.');
 
-        const profile = await getUserProfile(user.id);
-        if (!profile || !profile.name) return showModal('Debes completar tu perfil antes de fichar.');
+        const { data: profile, error: profileError } = await supabase
+            .from('socorristas')
+            .select('name')
+            .eq('id', user.id)
+            .single();
+
+        if (profileError || !profile) return showModal('Debes completar tu perfil antes de fichar.');
 
         try {
             const location = await getLocation();
@@ -141,7 +127,6 @@ document.addEventListener('DOMContentLoaded', async function () {
                 showModal('Fichaje de salida correcto.');
             }
         } catch (err) {
-            console.error('Error al fichar:', err);
             showModal(`Error al fichar: ${err.message || 'desconocido'}`);
         }
     }
