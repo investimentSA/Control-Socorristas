@@ -1,9 +1,7 @@
-import { createClient } from '@supabase/supabase-js';
-
 document.addEventListener('DOMContentLoaded', async function () {
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; 
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
-    const supabase = createClient(supabaseUrl, supabaseKey);
+    const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const emailInput = document.getElementById('email');
     const passwordInput = document.getElementById('password');
@@ -41,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            showAppView(data.user.email);
+            showAppView(email);
         }
     }
 
@@ -55,13 +53,13 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     async function clockIn() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return showModal('No hay usuario autenticado.');
-        
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) return showModal('No hay usuario autenticado.');
+
         try {
             const location = await getLocation();
             await supabase.from('attendance').insert([{
-                user_id: user.id,  
+                user_id: data.session.user.id,  
                 clock_in: new Date().toISOString(),
                 location
             }]);
@@ -72,15 +70,15 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     async function clockOut() {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return showModal('No hay usuario autenticado.');
-        
+        const { data } = await supabase.auth.getSession();
+        if (!data.session) return showModal('No hay usuario autenticado.');
+
         try {
             const location = await getLocation();
-            const { data, error } = await supabase.from('attendance')
+            const { error } = await supabase.from('attendance')
                 .update({ clock_out: new Date().toISOString(), location })
-                .eq('user_id', user.id)
-                .eq('clock_out', null);
+                .eq('user_id', data.session.user.id)
+                .is('clock_out', null);  // Corregido el filtro de salida
 
             if (error) {
                 showModal('Error al fichar salida: ' + error.message);
@@ -151,8 +149,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     closeModal.addEventListener('click', hideModal);
 
     async function checkUserSession() {
-        const { data: { user } } = await supabase.auth.getUser();
-        user ? showAppView(user.email) : showLoginView();
+        const { data } = await supabase.auth.getSession();
+        data.session ? showAppView(data.session.user.email) : showLoginView();
     }
 
     checkUserSession();
