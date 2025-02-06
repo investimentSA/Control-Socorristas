@@ -8,7 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.error("La librería de Supabase no está cargada o no es accesible.");
     return;
   }
-  
+
   // Inicializar el cliente de Supabase
   const { createClient } = window.supabase;
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -35,13 +35,32 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
+      // Verificar si el correo ya existe en la tabla 'usuarios'
+      const { data: existingUser, error: checkError } = await supabase
+        .from("usuarios")
+        .select("correo")
+        .eq("correo", email)
+        .single();
+
+      if (checkError && checkError.code !== "PGRST116") {
+        // Si hubo un error distinto a "no se encontró el correo", muestra el error
+        alert("Error al verificar el correo: " + checkError.message);
+        return;
+      }
+
+      if (existingUser) {
+        // Si el correo ya está registrado, mostrar un mensaje
+        alert("Este correo electrónico ya está registrado.");
+        return;
+      }
+
       // Registro en Supabase Auth
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
         options: {
-          data: { nombre: nombreCompleto } // Guardar el nombre como metadato en Auth
-        }
+          data: { nombre: nombreCompleto }, // Guardar el nombre como metadato en Auth
+        },
       });
 
       if (error) {
@@ -49,14 +68,14 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Insertar los datos del usuario en la tabla 'usuarios'
+      // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
       const { error: insertError } = await supabase
         .from("usuarios")
         .insert([
           {
             nombre: nombreCompleto,
-            correo: email
-          }
+            correo: email,
+          },
         ]);
 
       if (insertError) {
@@ -72,3 +91,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
