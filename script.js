@@ -2,7 +2,7 @@
 const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';  // URL de tu Supabase
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';  // Tu API Key de Supabase
 
-// Crear cliente de Supabase solo una vez
+// Inicializar el cliente de Supabase correctamente
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
 // Lógica de inicio de sesión
