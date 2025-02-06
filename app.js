@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            showAppView(email);
+            showAppView(data.user.email);
         }
     }
 
@@ -181,4 +181,3 @@ document.addEventListener('DOMContentLoaded', async function () {
         showLoginView();
     }
 });
-
