@@ -25,7 +25,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
       alert('Correo o contraseña incorrectos');
     } else {
       alert('¡Inicio de sesión exitoso!');
-      window.location.href = 'dashboard.html';
+      window.location.href = 'fichaje.html';
     }
   } catch (error) {
     alert('Error al intentar iniciar sesión');
