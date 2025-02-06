@@ -1,5 +1,5 @@
-// Asegurar que Supabase está cargado antes de usarlo
-const { createClient } = supabase;
+// Obtener createClient desde window.supabase
+const { createClient } = window.supabase;
 
 // Configuración de Supabase
 const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
