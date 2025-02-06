@@ -1,20 +1,37 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Referencias a los elementos del DOM
   const clockDisplay = document.getElementById('clockDisplay');
   const btnEntrada = document.getElementById('btnEntrada');
   const btnSalida = document.getElementById('btnSalida');
   const btnCerrarSesion = document.getElementById('btnCerrarSesion');
   const statusMessage = document.getElementById('status');
+  const nombreUsuario = document.getElementById('nombreUsuario');
 
-  // Actualizar reloj
+  // Configuración de Supabase
+  const supabaseUrl = 'https://tu-url-de-supabase.supabase.co';  // Cambiar por tu URL de Supabase
+  const supabaseKey = 'tu-api-key-de-supabase';  // Cambiar por tu clave de API de Supabase
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+  // Verificar si el usuario está autenticado
+  const user = supabase.auth.user();
+  if (user) {
+    // Mostrar nombre del usuario
+    nombreUsuario.textContent = user.email;
+  } else {
+    // Redirigir al inicio si no hay usuario autenticado
+    window.location.href = 'index.html';
+  }
+
+  // Función para actualizar el reloj
   function updateClock() {
     const now = new Date();
     clockDisplay.textContent = now.toLocaleTimeString();
   }
-  
+
   setInterval(updateClock, 1000);
   updateClock();
 
-  // Función para obtener la ubicación
+  // Función para obtener la ubicación del usuario
   async function getLocation() {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -29,18 +46,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Función para mostrar mensajes de estado
+  // Función para mostrar los mensajes de estado
   function showStatus(message, isError = false) {
     statusMessage.textContent = message;
     statusMessage.className = 'status-message ' + (isError ? 'error' : 'active');
   }
 
-  // Manejar fichaje
+  // Función para manejar el fichaje (entrada/salida)
   async function handleFichaje(tipo) {
     try {
       showStatus('Obteniendo ubicación...');
       const position = await getLocation();
-      
+
       const timestamp = new Date().toISOString();
       const fichaje = {
         tipo,
@@ -51,25 +68,26 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       };
 
-      // Aquí se enviaría la información al servidor
+      // Aquí se enviaría la información al servidor (puedes integrar esto con Supabase para guardarlo en la base de datos)
       console.log('Fichaje registrado:', fichaje);
-      
+
       showStatus(`${tipo} registrada correctamente a las ${new Date().toLocaleTimeString()}`);
     } catch (error) {
       showStatus(`Error al registrar ${tipo.toLowerCase()}: ${error}`, true);
     }
   }
 
+  // Eventos de los botones de fichaje
   btnEntrada.addEventListener('click', () => handleFichaje('Entrada'));
   btnSalida.addEventListener('click', () => handleFichaje('Salida'));
-  
-  btnCerrarSesion.addEventListener('click', () => {
-    // Aquí iría la lógica de cierre de sesión
-    window.location.href = 'index.html';
-  });
 
-  // Mostrar nombre del usuario (se obtendría de la sesión actual)
-  const nombreUsuario = document.getElementById('nombreUsuario');
-  // Simular nombre de usuario - en producción vendría de la sesión
-  nombreUsuario.textContent = 'Juan Pérez';
+  // Lógica de cierre de sesión
+  btnCerrarSesion.addEventListener('click', async () => {
+    try {
+      await supabase.auth.signOut();  // Cerrar sesión con Supabase
+      window.location.href = 'index.html';  // Redirigir a la página de inicio
+    } catch (error) {
+      console.error('Error al cerrar sesión', error.message);
+    }
+  });
 });
