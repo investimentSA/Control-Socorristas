@@ -65,28 +65,20 @@ document.getElementById("registroForm").addEventListener("submit", async functio
     // Verifica si la respuesta contiene datos, lo que significa que la cuenta fue creada
     if (data) {
       // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
-      const user = supabase.auth.user();  // Obtiene el usuario autenticado
-      if (user) {
-        const { error: insertError } = await supabase
-          .from("usuarios")
-          .insert([
-            {
-              nombre: nombreCompleto,
-              correo: email,
-              auth_uid: user.id,  // Establece el id de usuario autenticado
-            }
-          ]);
+      const { error: insertError } = await supabase
+        .from("usuarios")
+        .insert([{
+          nombre: nombreCompleto,
+          correo: email,
+        }]);
 
-        if (insertError) {
-          alert("Error al registrar los datos del usuario: " + insertError.message);
-          return;
-        }
-
-        alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
-        window.location.href = "index.html"; // Redirigir al login
-      } else {
-        alert("Error: Usuario no autenticado.");
+      if (insertError) {
+        alert("Error al registrar los datos del usuario: " + insertError.message);
+        return;
       }
+
+      alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
+      window.location.href = "index.html"; // Redirigir al login
     }
   } catch (error) {
     alert("Hubo un error en el registro: " + error.message);
