@@ -11,12 +11,12 @@ document.addEventListener('DOMContentLoaded', async function () {
     const clockOutBtn = document.getElementById('clock-out-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const userNameSpan = document.getElementById('user-name');
+    const userLocationSpan = document.getElementById('user-location');
     const modalMessage = document.getElementById('modal-message');
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('close-modal');
-    let map;
 
-    // Función para mostrar modal de mensaje
+    // Mostrar mensaje en el modal
     function showModal(message) {
         modalMessage.textContent = message;
         modal.style.display = 'block';
@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         modal.style.display = 'none';
     }
 
-    // Función para registrar usuario
+    // Función para registrar un nuevo usuario
     async function registerUser(email, password) {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) {
@@ -42,7 +42,8 @@ document.addEventListener('DOMContentLoaded', async function () {
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            showAppView(data.user.email); // Pasamos el email del usuario autenticado
+            // Una vez logueado, mostrar la vista de la aplicación
+            showAppView(data.user.email);
         }
     }
 
@@ -56,23 +57,32 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Función para mostrar vista de la app (fichaje)
+    // Función para mostrar la vista de la aplicación después de iniciar sesión
     function showAppView(email) {
+        // Cambiar el nombre de usuario
         userNameSpan.textContent = email;
-        clockInBtn.style.display = 'inline-block';  // Muestra el botón de fichaje de entrada
-        clockOutBtn.style.display = 'inline-block'; // Muestra el botón de fichaje de salida
-        loginBtn.style.display = 'none'; // Oculta el botón de inicio de sesión
-        registerBtn.style.display = 'none'; // Oculta el botón de registro
-        logoutBtn.style.display = 'inline-block'; // Muestra el botón de cerrar sesión
+        // Mostrar el contenedor principal de la app
+        document.getElementById('app-container').style.display = 'block';
+        // Esconder el contenedor de inicio de sesión
+        document.getElementById('login-container').style.display = 'none';
+        // Mostrar los botones de fichar entrada y salida
+        clockInBtn.style.display = 'inline-block';
+        clockOutBtn.style.display = 'inline-block';
+        // Mostrar el botón de cerrar sesión
+        logoutBtn.style.display = 'inline-block';
     }
 
-    // Función para mostrar vista de inicio de sesión
+    // Función para mostrar la vista de inicio de sesión
     function showLoginView() {
-        loginBtn.style.display = 'inline-block'; // Muestra el botón de inicio de sesión
-        registerBtn.style.display = 'inline-block'; // Muestra el botón de registro
-        clockInBtn.style.display = 'none'; // Oculta el botón de fichaje de entrada
-        clockOutBtn.style.display = 'none'; // Oculta el botón de fichaje de salida
-        logoutBtn.style.display = 'none'; // Oculta el botón de cerrar sesión
+        // Mostrar el contenedor de login
+        document.getElementById('login-container').style.display = 'block';
+        // Esconder el contenedor de la app
+        document.getElementById('app-container').style.display = 'none';
+        // Esconder los botones de fichar
+        clockInBtn.style.display = 'none';
+        clockOutBtn.style.display = 'none';
+        // Esconder el botón de cerrar sesión
+        logoutBtn.style.display = 'none';
     }
 
     // Función para fichar entrada
@@ -135,7 +145,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
-    // Función para obtener ubicación
+    // Función para obtener la ubicación del usuario
     function getLocation() {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
@@ -162,7 +172,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     clockOutBtn.addEventListener('click', clockOut);
     closeModal.addEventListener('click', hideModal);
 
-    // Comprobamos si el usuario ya está autenticado
+    // Verificar si hay una sesión activa al cargar la página
     const { data: { session } } = await supabase.auth.getSession();
     if (session) {
         showAppView(session.user.email);
