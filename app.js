@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', async function () {
     const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; 
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
+    const supabaseKey = 'YOUR_SUPABASE_KEY';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
     const emailInput = document.getElementById('email');
@@ -56,10 +56,22 @@ document.addEventListener('DOMContentLoaded', async function () {
         const { data } = await supabase.auth.getSession();
         if (!data.session) return showModal('No hay usuario autenticado.');
 
+        const { data: attendanceData, error } = await supabase
+            .from('attendance')
+            .select('*')
+            .eq('user_id', data.session.user.id)
+            .is('clock_out', null)
+            .single();
+
+        if (attendanceData) {
+            showModal('Ya has fichado entrada.');
+            return;
+        }
+
         try {
             const location = await getLocation();
             await supabase.from('attendance').insert([{
-                user_id: data.session.user.id,  
+                user_id: data.session.user.id,
                 clock_in: new Date().toISOString(),
                 location
             }]);
@@ -73,18 +85,26 @@ document.addEventListener('DOMContentLoaded', async function () {
         const { data } = await supabase.auth.getSession();
         if (!data.session) return showModal('No hay usuario autenticado.');
 
+        const { data: attendanceData, error } = await supabase
+            .from('attendance')
+            .select('*')
+            .eq('user_id', data.session.user.id)
+            .is('clock_out', null)
+            .single();
+
+        if (!attendanceData) {
+            showModal('Primero debes fichar la entrada.');
+            return;
+        }
+
         try {
             const location = await getLocation();
-            const { error } = await supabase.from('attendance')
+            await supabase.from('attendance')
                 .update({ clock_out: new Date().toISOString(), location })
                 .eq('user_id', data.session.user.id)
-                .is('clock_out', null);  // Corregido el filtro de salida
+                .is('clock_out', null);  // Solo permite actualizar si no hay salida
 
-            if (error) {
-                showModal('Error al fichar salida: ' + error.message);
-            } else {
-                showModal('Fichado correctamente.');
-            }
+            showModal('Fichado correctamente.');
         } catch (err) {
             showModal('Error al obtener ubicación: ' + err);
         }
@@ -130,29 +150,35 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     function showAppView(email) {
-        document.getElementById('login-container').style.display = 'none';
-        document.getElementById('app-container').style.display = 'block';
         userNameSpan.textContent = email;
+        clockInBtn.style.display = 'inline-block';
+        clockOutBtn.style.display = 'inline-block';
+        loginBtn.style.display = 'none';
+        registerBtn.style.display = 'none';
+        logoutBtn.style.display = 'inline-block';
     }
 
     function showLoginView() {
-        document.getElementById('login-container').style.display = 'block';
-        document.getElementById('app-container').style.display = 'none';
-        userNameSpan.textContent = '';
+        loginBtn.style.display = 'inline-block';
+        registerBtn.style.display = 'inline-block';
+        clockInBtn.style.display = 'none';
+        clockOutBtn.style.display = 'none';
+        logoutBtn.style.display = 'none';
     }
 
     loginBtn.addEventListener('click', () => loginUser(emailInput.value, passwordInput.value));
     registerBtn.addEventListener('click', () => registerUser(emailInput.value, passwordInput.value));
+    logoutBtn.addEventListener('click', logoutUser);
     clockInBtn.addEventListener('click', clockIn);
     clockOutBtn.addEventListener('click', clockOut);
-    logoutBtn.addEventListener('click', logoutUser);
     closeModal.addEventListener('click', hideModal);
 
-    async function checkUserSession() {
-        const { data } = await supabase.auth.getSession();
-        data.session ? showAppView(data.session.user.email) : showLoginView();
+    // Comprobamos si el usuario ya está autenticado
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+        showAppView(session.user.email);
+    } else {
+        showLoginView();
     }
-
-    checkUserSession();
 });
 
