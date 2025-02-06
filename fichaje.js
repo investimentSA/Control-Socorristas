@@ -1,5 +1,13 @@
 document.addEventListener('DOMContentLoaded', async () => {
-  // Referencias a los elementos del DOM
+  // Obtener createClient desde window.supabase
+  const { createClient } = window.supabase;
+
+  // Configuración de Supabase
+  const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; // Cambia por tu URL real
+  const supabaseKey = 'tu-api-key-de-supabase'; // Cambia por tu clave API
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  // Referencias a elementos del DOM
   const clockDisplay = document.getElementById('clockDisplay');
   const btnEntrada = document.getElementById('btnEntrada');
   const btnSalida = document.getElementById('btnSalida');
@@ -7,22 +15,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusMessage = document.getElementById('status');
   const nombreUsuario = document.getElementById('nombreUsuario');
 
-  // Configuración de Supabase
-  const supabaseUrl = 'https://tu-url-de-supabase.supabase.co';  // Cambiar por tu URL de Supabase
-  const supabaseKey = 'tu-api-key-de-supabase';  // Cambiar por tu clave de API de Supabase
-  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
+  // ✅ Obtener el usuario autenticado en Supabase
+  const { data: { user }, error } = await supabase.auth.getUser();
 
-  // Verificar si el usuario está autenticado
-  const user = supabase.auth.user();
-  if (user) {
-    // Mostrar nombre del usuario
-    nombreUsuario.textContent = user.email;
-  } else {
-    // Redirigir al inicio si no hay usuario autenticado
-    window.location.href = 'index.html';
+  if (error || !user) {
+    window.location.href = 'index.html'; // 🔄 Redirigir si no hay usuario
+    return;
   }
 
-  // Función para actualizar el reloj
+  // Mostrar el correo del usuario en la UI
+  nombreUsuario.textContent = user.email;
+
+  // ⏰ Función para actualizar el reloj
   function updateClock() {
     const now = new Date();
     clockDisplay.textContent = now.toLocaleTimeString();
@@ -31,11 +35,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   setInterval(updateClock, 1000);
   updateClock();
 
-  // Función para obtener la ubicación del usuario
+  // 📍 Función para obtener ubicación
   async function getLocation() {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject('La geolocalización no está soportada por este navegador.');
+        reject('La geolocalización no está soportada en este navegador.');
         return;
       }
 
@@ -46,13 +50,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // Función para mostrar los mensajes de estado
+  // 📢 Función para mostrar mensajes en pantalla
   function showStatus(message, isError = false) {
     statusMessage.textContent = message;
     statusMessage.className = 'status-message ' + (isError ? 'error' : 'active');
   }
 
-  // Función para manejar el fichaje (entrada/salida)
+  // ✅ Función para registrar fichaje en Supabase
   async function handleFichaje(tipo) {
     try {
       showStatus('Obteniendo ubicación...');
@@ -60,32 +64,35 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const timestamp = new Date().toISOString();
       const fichaje = {
+        usuario_id: user.id, // ID del usuario autenticado
         tipo,
         timestamp,
-        coords: {
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude
-        }
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
       };
 
-      // Aquí se enviaría la información al servidor (puedes integrar esto con Supabase para guardarlo en la base de datos)
-      console.log('Fichaje registrado:', fichaje);
+      // 📤 Enviar datos a Supabase
+      const { error } = await supabase
+        .from('fichajes') // Asegúrate de que esta tabla existe en tu BD
+        .insert(fichaje);
+
+      if (error) throw error;
 
       showStatus(`${tipo} registrada correctamente a las ${new Date().toLocaleTimeString()}`);
     } catch (error) {
-      showStatus(`Error al registrar ${tipo.toLowerCase()}: ${error}`, true);
+      showStatus(`Error al registrar ${tipo.toLowerCase()}: ${error.message}`, true);
     }
   }
 
-  // Eventos de los botones de fichaje
+  // 🎯 Eventos de fichaje
   btnEntrada.addEventListener('click', () => handleFichaje('Entrada'));
   btnSalida.addEventListener('click', () => handleFichaje('Salida'));
 
-  // Lógica de cierre de sesión
+  // 🔴 Cierre de sesión
   btnCerrarSesion.addEventListener('click', async () => {
     try {
-      await supabase.auth.signOut();  // Cerrar sesión con Supabase
-      window.location.href = 'index.html';  // Redirigir a la página de inicio
+      await supabase.auth.signOut();
+      window.location.href = 'index.html';
     } catch (error) {
       console.error('Error al cerrar sesión', error.message);
     }
