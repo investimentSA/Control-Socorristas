@@ -1,11 +1,15 @@
 document.addEventListener('DOMContentLoaded', async () => {
-
   // Asegúrate de que la librería de Supabase esté disponible
+  if (!window.supabase) {
+    console.error('La librería de Supabase no está cargada.');
+    return;  // Salir si Supabase no está disponible
+  }
+
   const { createClient } = window.supabase;
 
   // Configuración de Supabase
-  const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; // Cambia por tu URL real de Supabase
-  const supabaseKey = 'tu-api-key-de-supabase'; // Cambia por tu clave API de Supabase
+  const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; // Tu URL de Supabase
+  const supabaseKey = 'tu-api-key-de-supabase'; // Tu clave API de Supabase
 
   // Inicializar el cliente de Supabase
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -18,17 +22,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusMessage = document.getElementById('status');
   const nombreUsuario = document.getElementById('nombreUsuario');
 
-  // ✅ Obtener el usuario autenticado desde Supabase
-  const { data: { user }, error } = await supabase.auth.getUser();
-
-  if (error || !user) {
-    // Si no hay usuario autenticado, redirigir a la página de inicio
-    window.location.href = 'index.html';
-    return;
+  // Verificar si los elementos del DOM existen antes de añadir eventos
+  if (!btnEntrada || !btnSalida || !btnCerrarSesion) {
+    console.error('Algunos botones no están presentes en el DOM.');
+    return;  // Salir si no se encuentran los botones
   }
 
-  // Mostrar el correo del usuario en la UI
-  nombreUsuario.textContent = user.email;
+  // ✅ Obtener el usuario autenticado desde Supabase
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      // Si no hay usuario autenticado, redirigir a la página de inicio
+      window.location.href = 'index.html';
+      return;
+    }
+
+    // Mostrar el correo del usuario en la UI
+    nombreUsuario.textContent = user.email;
+
+  } catch (error) {
+    console.error('Error al obtener el usuario:', error);
+    window.location.href = 'index.html';  // Redirigir si hay un error
+    return;
+  }
 
   // ⏰ Función para actualizar el reloj en la UI
   function updateClock() {
