@@ -2,9 +2,10 @@
 const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';  // Tu URL de Supabase
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';  // Tu clave de API de Supabase
 
+// Crear el cliente de Supabase correctamente
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// Función para el inicio de sesión
+// Lógica de inicio de sesión
 document.getElementById("loginForm").addEventListener("submit", async function(event) {
   event.preventDefault();
 
@@ -23,7 +24,7 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
     } else {
       alert('¡Inicio de sesión exitoso!');
       // Redirigir a la pantalla principal o dashboard
-      window.location.href = 'dashboard.html'; // Puedes cambiar la URL de destino
+      window.location.href = 'dashboard.html'; // Cambia la URL si es necesario
     }
   } catch (error) {
     alert('Error al intentar iniciar sesión');
