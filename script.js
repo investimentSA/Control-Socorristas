@@ -33,3 +33,58 @@ document.getElementById("loginForm").addEventListener("submit", async function(e
   }
 });
 
+// Manejar el registro de usuario
+document.getElementById("registroForm").addEventListener("submit", async function(event) {
+  event.preventDefault();
+
+  const nombreCompleto = document.getElementById("nombreCompleto").value.trim();
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  // Validar que los campos no estén vacíos
+  if (!nombreCompleto || !email || !password) {
+    alert("Por favor, completa todos los campos.");
+    return;
+  }
+
+  try {
+    // Registro en Supabase Auth
+    const { data, error } = await supabase.auth.signUp({
+      email: email,
+      password: password,
+      options: {
+        data: { nombre: nombreCompleto }, // Guardar el nombre como metadato en Auth
+      },
+    });
+
+    if (error) {
+      alert("Error al crear la cuenta: " + error.message);
+      return;
+    }
+
+    // Verifica si la respuesta contiene datos, lo que significa que la cuenta fue creada
+    if (data) {
+      // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
+      const { error: insertError } = await supabase
+        .from("usuarios")
+        .insert([
+          {
+            nombre: nombreCompleto,
+            correo: email,
+          }
+        ]);
+
+      if (insertError) {
+        alert("Error al registrar los datos del usuario: " + insertError.message);
+        return;
+      }
+
+      alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
+      window.location.href = "index.html"; // Redirigir al login
+    }
+  } catch (error) {
+    alert("Hubo un error en el registro: " + error.message);
+  }
+});
+
+
