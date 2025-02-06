@@ -3,51 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>App de Registro</title>
+    <title>Registro y Login de Socorristas</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <!-- Contenedor de inicio de sesión -->
-    <div id="login-container">
-        <h2>Iniciar Sesión</h2>
-        <input type="email" id="email" placeholder="Email" required>
-        <input type="password" id="password" placeholder="Password" required>
-        <button id="login-btn">Iniciar sesión</button>
-        <button id="register-btn">Registrarse</button>
-    </div>
-    
-    <!-- Contenedor de configuración de perfil (solo después del registro) -->
-    <div id="profile-setup-container" style="display:none;">
-        <h2>Completa tu perfil</h2>
-        <input type="text" id="user-name-input" placeholder="Nombre" required>
-        <input type="file" id="photo-upload" accept="image/*">
-        <button id="save-profile-btn">Guardar Perfil</button>
+    <!-- Pantalla de Registro -->
+    <div id="registro" class="auth-screen">
+        <h2>Registrar Socorrista</h2>
+        <input type="email" id="email" placeholder="Correo Electrónico" required>
+        <input type="password" id="password" placeholder="Contraseña" required>
+        <input type="file" id="foto" accept="image/*" required>
+        <button onclick="registrarUsuario()">Registrar</button>
+        <p>¿Ya tienes cuenta? <a href="#" onclick="mostrarLogin()">Iniciar sesión</a></p>
     </div>
 
-    <!-- Contenedor principal de la aplicación -->
-    <div id="app-container" style="display:none;">
-        <p>Bienvenido, <span id="user-name"></span></p>
-        <img id="user-photo" src="" alt="Foto de perfil" style="display:none; width:100px; height:100px; border-radius:50%;">
-        <p>Ubicación: <span id="user-location"></span></p>
-        <button id="clock-in-btn">Fichar Entrada</button>
-        <button id="clock-out-btn">Fichar Salida</button>
-        <button id="logout-btn">Cerrar Sesión</button>
+    <!-- Pantalla de Login -->
+    <div id="login" class="auth-screen" style="display: none;">
+        <h2>Iniciar sesión</h2>
+        <input type="email" id="emailLogin" placeholder="Correo Electrónico" required>
+        <input type="password" id="passwordLogin" placeholder="Contraseña" required>
+        <button onclick="iniciarSesion()">Iniciar sesión</button>
+        <p>¿No tienes cuenta? <a href="#" onclick="mostrarRegistro()">Registrar</a></p>
     </div>
 
-    <!-- Modal para mostrar mensajes -->
-    <div id="modal" style="display:none;">
-        <div>
-            <span id="modal-message"></span>
-            <button id="close-modal">Cerrar</button>
-        </div>
-    </div>
-
-    <!-- Cargar el script de Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.0.0/dist/umd/supabase.js"></script>
-    
-    <!-- Tu archivo app.js -->
-    <script src="app.js"></script>  <!-- Quita type="module" -->
-
-
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
