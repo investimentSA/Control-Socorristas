@@ -5,10 +5,17 @@ document.addEventListener("DOMContentLoaded", () => {
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // Tu clave de API
 
   // Inicializa correctamente el cliente de Supabase
-  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+  const { createClient } = window.supabase; // Asegúrate de que supabase.js está correctamente cargado
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Captura el formulario de registro
   const registroForm = document.getElementById("registroForm");
+
+  // Verificar que el formulario de registro exista
+  if (!registroForm) {
+    console.error("Formulario de registro no encontrado.");
+    return;
+  }
 
   // Maneja el envío del formulario
   registroForm.addEventListener("submit", async function (event) {
