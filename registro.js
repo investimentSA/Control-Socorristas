@@ -3,9 +3,9 @@ document.addEventListener("DOMContentLoaded", () => {
   // Configuración de Supabase
   const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  // URL de tu Supabase
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // Tu clave de API
-
-  // Inicializa correctamente el cliente de Supabase
-  const { createClient } = window.supabase; // Asegúrate de que supabase.js está correctamente cargado
+  
+  // Asegúrate de que Supabase.js esté correctamente cargado
+  const { createClient } = window.supabase;
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Captura el formulario de registro
@@ -26,6 +26,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
+    // Validar que los campos no estén vacíos
     if (!nombreCompleto || !email || !password) {
       alert("Por favor, completa todos los campos.");
       return;
@@ -41,12 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
         },
       });
 
+      // Si hay un error en el registro, muestra el mensaje y detén la ejecución
       if (error) {
         alert("Error al crear la cuenta: " + error.message);
         return;
       }
 
-      // Insertar datos del usuario en la tabla 'usuarios' (sin contraseña)
+      // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
       const { error: insertError } = await supabase
         .from("usuarios")
         .insert([
@@ -56,11 +58,13 @@ document.addEventListener("DOMContentLoaded", () => {
           },
         ]);
 
+      // Si ocurre un error al insertar los datos del usuario
       if (insertError) {
         alert("Error al registrar los datos del usuario: " + insertError.message);
         return;
       }
 
+      // Si todo sale bien, muestra un mensaje de éxito y redirige al login
       alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
       window.location.href = "index.html"; // Redirigir al login
     } catch (error) {
@@ -68,4 +72,3 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
