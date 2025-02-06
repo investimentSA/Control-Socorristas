@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', async function () {
-    const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; 
+    const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
@@ -16,6 +16,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     const closeModal = document.getElementById('close-modal');
     let map;
 
+    // Función para mostrar modal de mensaje
     function showModal(message) {
         modalMessage.textContent = message;
         modal.style.display = 'block';
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         modal.style.display = 'none';
     }
 
+    // Función para registrar usuario
     async function registerUser(email, password) {
         const { error } = await supabase.auth.signUp({ email, password });
         if (error) {
@@ -34,15 +36,17 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // Función para iniciar sesión
     async function loginUser(email, password) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) {
             showModal('Error al iniciar sesión: ' + error.message);
         } else {
-            showAppView(data.user.email);
+            showAppView(data.user.email); // Pasamos el email del usuario autenticado
         }
     }
 
+    // Función para cerrar sesión
     async function logoutUser() {
         const { error } = await supabase.auth.signOut();
         if (error) {
@@ -52,6 +56,26 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // Función para mostrar vista de la app (fichaje)
+    function showAppView(email) {
+        userNameSpan.textContent = email;
+        clockInBtn.style.display = 'inline-block';  // Muestra el botón de fichaje de entrada
+        clockOutBtn.style.display = 'inline-block'; // Muestra el botón de fichaje de salida
+        loginBtn.style.display = 'none'; // Oculta el botón de inicio de sesión
+        registerBtn.style.display = 'none'; // Oculta el botón de registro
+        logoutBtn.style.display = 'inline-block'; // Muestra el botón de cerrar sesión
+    }
+
+    // Función para mostrar vista de inicio de sesión
+    function showLoginView() {
+        loginBtn.style.display = 'inline-block'; // Muestra el botón de inicio de sesión
+        registerBtn.style.display = 'inline-block'; // Muestra el botón de registro
+        clockInBtn.style.display = 'none'; // Oculta el botón de fichaje de entrada
+        clockOutBtn.style.display = 'none'; // Oculta el botón de fichaje de salida
+        logoutBtn.style.display = 'none'; // Oculta el botón de cerrar sesión
+    }
+
+    // Función para fichar entrada
     async function clockIn() {
         const { data } = await supabase.auth.getSession();
         if (!data.session) return showModal('No hay usuario autenticado.');
@@ -81,6 +105,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // Función para fichar salida
     async function clockOut() {
         const { data } = await supabase.auth.getSession();
         if (!data.session) return showModal('No hay usuario autenticado.');
@@ -102,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             await supabase.from('attendance')
                 .update({ clock_out: new Date().toISOString(), location })
                 .eq('user_id', data.session.user.id)
-                .is('clock_out', null);  // Solo permite actualizar si no hay salida
+                .is('clock_out', null);
 
             showModal('Fichado correctamente.');
         } catch (err) {
@@ -110,6 +135,7 @@ document.addEventListener('DOMContentLoaded', async function () {
         }
     }
 
+    // Función para obtener ubicación
     function getLocation() {
         return new Promise((resolve, reject) => {
             if (navigator.geolocation) {
@@ -118,52 +144,15 @@ document.addEventListener('DOMContentLoaded', async function () {
                         const latitude = position.coords.latitude;
                         const longitude = position.coords.longitude;
                         resolve(`${latitude}, ${longitude}`);
-                        showMap(latitude, longitude);
                     },
                     (error) => {
-                        if (error.code === error.PERMISSION_DENIED) {
-                            reject('El permiso de ubicación ha sido denegado. Habilítalo en tu navegador.');
-                        } else {
-                            reject('Error al obtener ubicación: ' + error.message);
-                        }
+                        reject('Error al obtener ubicación: ' + error.message);
                     }
                 );
             } else {
                 reject('Geolocalización no soportada');
             }
         });
-    }
-
-    function showMap(latitude, longitude) {
-        const location = { lat: latitude, lng: longitude };
-        if (!map) {
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 15,
-                center: location
-            });
-        }
-        new google.maps.Marker({
-            position: location,
-            map: map,
-            title: "Tu ubicación"
-        });
-    }
-
-    function showAppView(email) {
-        userNameSpan.textContent = email;
-        clockInBtn.style.display = 'inline-block';
-        clockOutBtn.style.display = 'inline-block';
-        loginBtn.style.display = 'none';
-        registerBtn.style.display = 'none';
-        logoutBtn.style.display = 'inline-block';
-    }
-
-    function showLoginView() {
-        loginBtn.style.display = 'inline-block';
-        registerBtn.style.display = 'inline-block';
-        clockInBtn.style.display = 'none';
-        clockOutBtn.style.display = 'none';
-        logoutBtn.style.display = 'none';
     }
 
     loginBtn.addEventListener('click', () => loginUser(emailInput.value, passwordInput.value));
