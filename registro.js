@@ -1,17 +1,16 @@
-// Asegurar que el DOM esté cargado antes de ejecutar el script
+// Espera a que el DOM esté completamente cargado antes de ejecutar el script
 document.addEventListener("DOMContentLoaded", () => {
   // Configuración de Supabase
-  const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";
-  const supabaseKey =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";
+  const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  // URL de tu Supabase
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // Tu clave de API
 
-  // Inicializar el cliente de Supabase (de manera correcta sin desestructuración)
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  // Inicializa correctamente el cliente de Supabase
+  const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-  // Capturar el formulario de registro
+  // Captura el formulario de registro
   const registroForm = document.getElementById("registroForm");
 
-  // Manejar el evento de envío del formulario
+  // Maneja el envío del formulario
   registroForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
@@ -62,3 +61,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
