@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', async () => {
+
   // Asegúrate de que la librería de Supabase esté disponible
   const { createClient } = window.supabase;
 
