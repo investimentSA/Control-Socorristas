@@ -11,14 +11,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; // URL de tu Supabase
   
   // Obtén la clave API desde una variable de entorno o un lugar seguro
-  const supabaseKey = process.env.SUPABASE_KEY; // Deberías usar algo como dotenv o un archivo de configuración para evitar dejar la clave directamente en el código
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // **Aquí puedes poner tu clave API de forma segura**
 
   if (!supabaseKey) {
     console.error('La clave de Supabase no está configurada.');
     return;  // Salir si la clave no está disponible
   }
 
-  // Inicializar el cliente de Supabase
+  // Inicializar el cliente de Supabase con la URL y la clave API
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Referencias a los elementos del DOM
