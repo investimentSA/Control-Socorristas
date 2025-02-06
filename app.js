@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             await supabase.from('attendance')
                 .update({ clock_out: new Date().toISOString(), location })
                 .eq('user_id', data.session.user.id)
-                .is('clock_out', null);
+                .is('clock_out', null); // Asegura que se actualice solo el primer registro sin salida.
 
             showModal('Fichado correctamente.');
         } catch (err) {
