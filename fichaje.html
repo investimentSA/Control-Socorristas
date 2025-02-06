@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Socorristas - Fichaje</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="fichaje.css">
+</head>
+<body>
+  <div class="container">
+    <div class="login-box fichaje-box">
+      <h1>Bienvenido/a</h1>
+      <h2 id="nombreUsuario">Nombre del Socorrista</h2>
+      
+      <div class="clock-display" id="clockDisplay">00:00:00</div>
+      
+      <div class="fichaje-buttons">
+        <button id="btnEntrada" class="btn fichaje-btn entrada">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6"/>
+          </svg>
+          Fichar Entrada
+        </button>
+        <button id="btnSalida" class="btn fichaje-btn salida">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6"/>
+          </svg>
+          Fichar Salida
+        </button>
+      </div>
+
+      <div id="status" class="status-message"></div>
+      
+      <button id="btnCerrarSesion" class="btn secondary logout-btn">
+        Cerrar Sesión
+      </button>
+    </div>
+  </div>
+  <script src="fichaje.js"></script>
+</body>
+</html>

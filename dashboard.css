@@ -1,0 +1,173 @@
+.dashboard-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.controls {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter-select {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background-color: var(--primary-color);
+  color: white;
+}
+
+.refresh-btn i {
+  font-size: 18px;
+}
+
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  margin-bottom: 30px;
+}
+
+.stat-card {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  border: 1px solid #eee;
+}
+
+.stat-card i {
+  font-size: 2.5rem;
+  color: var(--primary-color);
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.table-responsive {
+  overflow-x: auto;
+}
+
+.workers-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.workers-table th,
+.workers-table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+}
+
+.workers-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #666;
+}
+
+.workers-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+.status-indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.status-active {
+  background-color: #4CAF50;
+}
+
+.status-inactive {
+  background-color: #f44336;
+}
+
+.recent-action {
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .controls {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .filter-group {
+    width: 100%;
+  }
+  
+  .filter-select {
+    width: 100%;
+  }
+  
+  .refresh-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}

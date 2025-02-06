@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Control de Socorristas - Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="dashboard.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@mdi/font@6.5.95/css/materialdesignicons.min.css">
+</head>
+<body>
+  <div class="dashboard-container">
+    <header class="dashboard-header">
+      <h1>Panel de Control</h1>
+      <div class="controls">
+        <div class="filter-group">
+          <label for="sortBy">Ordenar por:</label>
+          <select id="sortBy" class="filter-select">
+            <option value="name">Nombre</option>
+            <option value="lastCheckIn">Última entrada</option>
+            <option value="lastCheckOut">Última salida</option>
+          </select>
+        </div>
+        <button id="refreshButton" class="btn refresh-btn">
+          <i class="mdi mdi-refresh"></i>
+          Actualizar
+        </button>
+      </div>
+    </header>
+
+    <div class="stats-container">
+      <div class="stat-card">
+        <i class="mdi mdi-account-group"></i>
+        <div class="stat-info">
+          <span class="stat-value" id="totalWorkers">0</span>
+          <span class="stat-label">Socorristas</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="mdi mdi-login"></i>
+        <div class="stat-info">
+          <span class="stat-value" id="activeWorkers">0</span>
+          <span class="stat-label">Activos</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <i class="mdi mdi-clock-outline"></i>
+        <div class="stat-info">
+          <span class="stat-value" id="totalCheckins">0</span>
+          <span class="stat-label">Fichajes hoy</span>
+        </div>
+      </div>
+    </div>
+
+    <main class="workers-container">
+      <div class="table-responsive">
+        <table class="workers-table">
+          <thead>
+            <tr>
+              <th>Estado</th>
+              <th>Nombre</th>
+              <th>Última entrada</th>
+              <th>Última salida</th>
+              <th>Ubicación</th>
+              <th>Total fichajes</th>
+            </tr>
+          </thead>
+          <tbody id="workersTableBody">
+            <!-- La tabla se llenará dinámicamente con JavaScript -->
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+  <script src="dashboard.js"></script>
+</body>
+</html>
