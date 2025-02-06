@@ -48,25 +48,29 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
-      const { error: insertError } = await supabase
-        .from("usuarios")
-        .insert([
-          {
-            nombre: nombreCompleto,
-            correo: email,
-          },
-        ]);
+      // Verifica si la respuesta contiene datos, lo que significa que la cuenta fue creada
+      if (data) {
+        // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
+        const { error: insertError } = await supabase
+          .from("usuarios")
+          .insert([
+            {
+              nombre: nombreCompleto,
+              correo: email,
+            },
+          ]);
 
-      // Si ocurre un error al insertar los datos del usuario
-      if (insertError) {
-        alert("Error al registrar los datos del usuario: " + insertError.message);
-        return;
+        // Si ocurre un error al insertar los datos del usuario
+        if (insertError) {
+          alert("Error al registrar los datos del usuario: " + insertError.message);
+          return;
+        }
+
+        // Si todo sale bien, muestra un mensaje de éxito
+        alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
+        window.location.href = "index.html"; // Redirigir al login
       }
 
-      // Si todo sale bien, muestra un mensaje de éxito y redirige al login
-      alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
-      window.location.href = "index.html"; // Redirigir al login
     } catch (error) {
       alert("Hubo un error en el registro: " + error.message);
     }
