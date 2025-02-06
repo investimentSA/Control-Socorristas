@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Configuración de Supabase
   const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  // URL de tu Supabase
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // Tu clave de API
-  
+
   // Asegúrate de que Supabase.js esté correctamente cargado
   const { createClient } = window.supabase;
   const supabase = createClient(supabaseUrl, supabaseKey);
@@ -70,9 +70,9 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
         window.location.href = "index.html"; // Redirigir al login
       }
-
     } catch (error) {
       alert("Hubo un error en el registro: " + error.message);
     }
   });
 });
+
