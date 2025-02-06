@@ -65,6 +65,57 @@ async function iniciarSesion() {
         alert(error.message);
     } else {
         alert('Bienvenido ' + session.user.email);
-        // Aquí puedes redirigir a la pantalla principal del trabajador
+        mostrarDashboard();  // Mostrar la pantalla del Dashboard
     }
+}
+
+// Mostrar el Dashboard después de iniciar sesión
+function mostrarDashboard() {
+    document.getElementById('login').style.display = 'none';
+    document.getElementById('registro').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    initMap();  // Inicializar el mapa
+}
+
+// Función para obtener las ubicaciones de los trabajadores desde Supabase
+async function obtenerUbicaciones() {
+    const { data, error } = await supabase
+        .from('registro_entradas')
+        .select('latitud, longitud, usuarios.nombre')
+        .eq('tipo_evento', 'entrada')  // Aquí estamos obteniendo las ubicaciones de las entradas
+        .order('fecha_hora', { ascending: false })  // Ordenar para obtener las más recientes
+        .limit(10);  // Limitar a las últimas 10 entradas
+
+    if (error) {
+        console.error(error);
+        return [];
+    }
+
+    return data;
+}
+
+// Función que se ejecuta cuando la API de Google Maps se ha cargado
+function initMap() {
+    const map = new google.maps.Map(document.getElementById('map'), {
+        center: { lat: 40.4168, lng: -3.7038 },  // Madrid, España (puedes cambiarlo)
+        zoom: 12
+    });
+
+    obtenerUbicaciones().then(trabajadores => {
+        trabajadores.forEach(trabajador => {
+            const marker = new google.maps.Marker({
+                position: { lat: trabajador.latitud, lng: trabajador.longitud },
+                map: map,
+                title: trabajador.nombre
+            });
+
+            const infowindow = new google.maps.InfoWindow({
+                content: `<h3>${trabajador.nombre}</h3>`
+            });
+
+            marker.addListener('click', function () {
+                infowindow.open(map, marker);
+            });
+        });
+    });
 }
