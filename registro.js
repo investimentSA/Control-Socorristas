@@ -1,17 +1,20 @@
-// Espera a que el DOM esté completamente cargado antes de ejecutar el script
 document.addEventListener("DOMContentLoaded", () => {
   // Configuración de Supabase
   const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  // URL de tu Supabase
   const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // Tu clave de API
 
-  // Asegúrate de que Supabase.js esté correctamente cargado
+  // Asegúrate de que Supabase.js esté cargado
+  if (!window.supabase || !window.supabase.createClient) {
+    console.error("La librería de Supabase no está cargada o no es accesible.");
+    return;
+  }
+  
+  // Inicializar el cliente de Supabase
   const { createClient } = window.supabase;
   const supabase = createClient(supabaseUrl, supabaseKey);
 
   // Captura el formulario de registro
   const registroForm = document.getElementById("registroForm");
-
-  // Verificar que el formulario de registro exista
   if (!registroForm) {
     console.error("Formulario de registro no encontrado.");
     return;
@@ -26,7 +29,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
 
-    // Validar que los campos no estén vacíos
     if (!nombreCompleto || !email || !password) {
       alert("Por favor, completa todos los campos.");
       return;
@@ -38,41 +40,35 @@ document.addEventListener("DOMContentLoaded", () => {
         email: email,
         password: password,
         options: {
-          data: { nombre: nombreCompleto }, // Guardar el nombre como metadato en Auth
-        },
+          data: { nombre: nombreCompleto } // Guardar el nombre como metadato en Auth
+        }
       });
 
-      // Si hay un error en el registro, muestra el mensaje y detén la ejecución
       if (error) {
         alert("Error al crear la cuenta: " + error.message);
         return;
       }
 
-      // Verifica si la respuesta contiene datos, lo que significa que la cuenta fue creada
-      if (data) {
-        // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
-        const { error: insertError } = await supabase
-          .from("usuarios")
-          .insert([
-            {
-              nombre: nombreCompleto,
-              correo: email,
-            },
-          ]);
+      // Insertar los datos del usuario en la tabla 'usuarios'
+      const { error: insertError } = await supabase
+        .from("usuarios")
+        .insert([
+          {
+            nombre: nombreCompleto,
+            correo: email
+          }
+        ]);
 
-        // Si ocurre un error al insertar los datos del usuario
-        if (insertError) {
-          alert("Error al registrar los datos del usuario: " + insertError.message);
-          return;
-        }
-
-        // Si todo sale bien, muestra un mensaje de éxito
-        alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
-        window.location.href = "index.html"; // Redirigir al login
+      if (insertError) {
+        alert("Error al registrar los datos del usuario: " + insertError.message);
+        return;
       }
+
+      alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
+      window.location.href = "index.html"; // Redirigir al login
+
     } catch (error) {
       alert("Hubo un error en el registro: " + error.message);
     }
   });
 });
-
