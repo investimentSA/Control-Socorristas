@@ -11,7 +11,6 @@ document.addEventListener('DOMContentLoaded', async function () {
     const clockOutBtn = document.getElementById('clock-out-btn');
     const logoutBtn = document.getElementById('logout-btn');
     const userNameSpan = document.getElementById('user-name');
-    const userLocationSpan = document.getElementById('user-location');
     const modalMessage = document.getElementById('modal-message');
     const modal = document.getElementById('modal');
     const closeModal = document.getElementById('close-modal');
@@ -59,29 +58,20 @@ document.addEventListener('DOMContentLoaded', async function () {
 
     // Función para mostrar la vista de la aplicación después de iniciar sesión
     function showAppView(email) {
-        // Cambiar el nombre de usuario
         userNameSpan.textContent = email;
-        // Mostrar el contenedor principal de la app
         document.getElementById('app-container').style.display = 'block';
-        // Esconder el contenedor de inicio de sesión
         document.getElementById('login-container').style.display = 'none';
-        // Mostrar los botones de fichar entrada y salida
         clockInBtn.style.display = 'inline-block';
         clockOutBtn.style.display = 'inline-block';
-        // Mostrar el botón de cerrar sesión
         logoutBtn.style.display = 'inline-block';
     }
 
     // Función para mostrar la vista de inicio de sesión
     function showLoginView() {
-        // Mostrar el contenedor de login
         document.getElementById('login-container').style.display = 'block';
-        // Esconder el contenedor de la app
         document.getElementById('app-container').style.display = 'none';
-        // Esconder los botones de fichar
         clockInBtn.style.display = 'none';
         clockOutBtn.style.display = 'none';
-        // Esconder el botón de cerrar sesión
         logoutBtn.style.display = 'none';
     }
 
@@ -111,7 +101,7 @@ document.addEventListener('DOMContentLoaded', async function () {
             }]);
             showModal('Fichado correctamente.');
         } catch (err) {
-            showModal('Error al obtener ubicación: ' + err);
+            showModal('Error al obtener ubicación: ' + err.message);
         }
     }
 
@@ -141,7 +131,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
             showModal('Fichado correctamente.');
         } catch (err) {
-            showModal('Error al obtener ubicación: ' + err);
+            showModal('Error al obtener ubicación: ' + err.message);
         }
     }
 
