@@ -28,9 +28,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   const nombreUsuario = document.getElementById('nombreUsuario');
 
   // Verificar si los elementos del DOM existen antes de añadir eventos
-  if (!btnEntrada || !btnSalida || !btnCerrarSesion) {
-    console.error('Algunos botones no están presentes en el DOM.');
-    return;  // Salir si no se encuentran los botones
+  if (!btnEntrada || !btnSalida || !btnCerrarSesion || !nombreUsuario || !statusMessage) {
+    console.error('Algunos elementos no están presentes en el DOM.');
+    return;  // Salir si no se encuentran los elementos
   }
 
   let user = null; // Inicializamos la variable user aquí
@@ -104,7 +104,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Crear el objeto de fichaje
       const fichaje = {
-        usuario_id: user.id, // ID del usuario autenticado
+        user_id: user.id, // ID del usuario autenticado
         tipo,
         timestamp,
         latitude: position.coords.latitude,
@@ -138,5 +138,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
 
 
