@@ -33,16 +33,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;  // Salir si no se encuentran los botones
   }
 
+  let user = null; // Inicializamos la variable user aquí
+
   // ✅ Obtener el usuario autenticado desde Supabase
   try {
-    const { data: { user }, error } = await supabase.auth.getUser();
+    const { data: { user: authenticatedUser }, error } = await supabase.auth.getUser();
 
-    if (error || !user) {
+    if (error || !authenticatedUser) {
       // Si no hay usuario autenticado, redirigir a la página de inicio
       window.location.href = 'index.html';
       return;
     }
 
+    user = authenticatedUser; // Asignar el usuario autenticado a la variable global 'user'
     // Mostrar el correo del usuario en la UI
     nombreUsuario.textContent = user.email;
 
@@ -86,6 +89,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ✅ Función para registrar el fichaje en Supabase
   async function handleFichaje(tipo) {
     try {
+      // Comprobar si 'user' está definido
       if (!user) {
         showStatus('Usuario no autenticado', true);
         return;  // No continuar si no hay usuario
