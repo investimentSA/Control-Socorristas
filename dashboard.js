@@ -14,7 +14,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   async function fetchWorkers() {
     const { data: fichajes, error } = await supabase
       .from('fichajes')
-      .select('id, user_id, check_in, check_out, location, total_checkins');
+      .select('id, user_id, check_in, check_out, location, total_checkins')
+      .order('check_in', { ascending: false }); // Ordenar por fecha de entrada
 
     if (error) {
       console.error('Error al obtener fichajes:', error);
@@ -65,7 +66,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Función para renderizar la tabla de trabajadores
   async function renderWorkers() {
     const workers = await fetchWorkers();
-    workersTableBody.innerHTML = '';
+    workersTableBody.innerHTML = ''; // Limpiar la tabla antes de agregar nuevos datos
+
+    if (workers.length === 0) {
+      workersTableBody.innerHTML = '<tr><td colspan="6">No se han encontrado fichajes.</td></tr>';
+      return;
+    }
 
     workers.forEach(worker => {
       const row = document.createElement('tr');
@@ -85,9 +91,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Evento para refrescar los datos de los fichajes
   refreshButton.addEventListener('click', async () => {
-    refreshButton.disabled = true;
+    refreshButton.disabled = true; // Deshabilitar el botón mientras se actualizan los datos
     await renderWorkers();
-    refreshButton.disabled = false;
+    refreshButton.disabled = false; // Habilitar el botón después de la actualización
   });
 
   // Cargar los datos de los fichajes al cargar la página
