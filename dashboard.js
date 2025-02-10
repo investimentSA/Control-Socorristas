@@ -1,38 +1,46 @@
-document.addEventListener('DOMContentLoaded', () => {
-  // Datos de ejemplo para simular trabajadores
-  let workers = [
-    {
-      id: 1,
-      name: "Juan Pérez",
-      lastCheckIn: "2024-01-20T08:00:00",
-      lastCheckOut: "2024-01-20T16:00:00",
-      location: { lat: 40.4168, lng: -3.7038 },
-      totalCheckins: 45,
-      isActive: true,
-      recentAction: true
-    },
-    {
-      id: 2,
-      name: "Ana García",
-      lastCheckIn: "2024-01-20T09:15:00",
-      lastCheckOut: null,
-      location: { lat: 40.4169, lng: -3.7039 },
-      totalCheckins: 38,
-      isActive: true,
-      recentAction: false
-    }
-  ];
+import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
+const supabaseUrl = 'TU_SUPABASE_URL';
+const supabaseKey = 'TU_SUPABASE_KEY';
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+document.addEventListener('DOMContentLoaded', async () => {
   const workersTableBody = document.getElementById('workersTableBody');
   const sortBySelect = document.getElementById('sortBy');
   const refreshButton = document.getElementById('refreshButton');
-  
-  function updateStats() {
-    document.getElementById('totalWorkers').textContent = workers.length;
-    document.getElementById('activeWorkers').textContent = 
-      workers.filter(w => w.isActive).length;
-    document.getElementById('totalCheckins').textContent = 
-      workers.reduce((acc, w) => acc + w.totalCheckins, 0);
+
+  async function fetchWorkers() {
+    const { data: fichajes, error } = await supabase
+      .from('fichajes')
+      .select('id, user_id, check_in, check_out, location, total_checkins');
+
+    if (error) {
+      console.error('Error al obtener fichajes:', error);
+      return [];
+    }
+
+    const { data: users, error: userError } = await supabase
+      .from('socorristas')
+      .select('id, name');
+
+    if (userError) {
+      console.error('Error al obtener usuarios:', userError);
+      return [];
+    }
+
+    return fichajes.map(fichaje => {
+      const user = users.find(u => u.id === fichaje.user_id) || {};
+      return {
+        id: fichaje.id,
+        name: user.name || 'Desconocido',
+        lastCheckIn: fichaje.check_in,
+        lastCheckOut: fichaje.check_out,
+        location: fichaje.location || { lat: 0, lng: 0 },
+        totalCheckins: fichaje.total_checkins || 0,
+        isActive: !fichaje.check_out,
+        recentAction: true,
+      };
+    });
   }
 
   function formatDateTime(dateString) {
@@ -50,15 +58,15 @@ document.addEventListener('DOMContentLoaded', () => {
     return `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
   }
 
-  function renderWorkers() {
+  async function renderWorkers() {
+    const workers = await fetchWorkers();
     workersTableBody.innerHTML = '';
-    
+
     workers.forEach(worker => {
       const row = document.createElement('tr');
       row.innerHTML = `
         <td>
-          <span class="status-indicator ${worker.isActive ? 'status-active' : 'status-inactive'} 
-            ${worker.recentAction ? 'recent-action' : ''}"></span>
+          <span class="status-indicator ${worker.isActive ? 'status-active' : 'status-inactive'}"></span>
         </td>
         <td>${worker.name}</td>
         <td>${formatDateTime(worker.lastCheckIn)}</td>
@@ -70,49 +78,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  function sortWorkers(criteria) {
-    switch(criteria) {
-      case 'name':
-        workers.sort((a, b) => a.name.localeCompare(b.name));
-        break;
-      case 'lastCheckIn':
-        workers.sort((a, b) => new Date(b.lastCheckIn) - new Date(a.lastCheckIn));
-        break;
-      case 'lastCheckOut':
-        workers.sort((a, b) => {
-          if (!a.lastCheckOut) return 1;
-          if (!b.lastCheckOut) return -1;
-          return new Date(b.lastCheckOut) - new Date(a.lastCheckOut);
-        });
-        break;
-    }
-    renderWorkers();
-  }
-
-  // Event Listeners
-  sortBySelect.addEventListener('change', (e) => {
-    sortWorkers(e.target.value);
+  refreshButton.addEventListener('click', async () => {
+    refreshButton.disabled = true;
+    await renderWorkers();
+    refreshButton.disabled = false;
   });
 
-  refreshButton.addEventListener('click', () => {
-    // Simular actualización de datos
-    const refreshAnimation = document.querySelector('.mdi-refresh');
-    refreshAnimation.style.animation = 'rotate 1s linear';
-    
-    // Simular nueva entrada/salida
-    const randomWorker = workers[Math.floor(Math.random() * workers.length)];
-    randomWorker.recentAction = true;
-    randomWorker.lastCheckIn = new Date().toISOString();
-    randomWorker.totalCheckins++;
-
-    setTimeout(() => {
-      refreshAnimation.style.animation = '';
-      renderWorkers();
-      updateStats();
-    }, 1000);
-  });
-
-  // Inicialización
-  sortWorkers('name');
-  updateStats();
+  await renderWorkers();
 });
