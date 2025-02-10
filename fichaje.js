@@ -9,9 +9,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Configuración de Supabase (evita dejar la clave directamente en el código)
   const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; // URL de tu Supabase
-  
-  // Aquí pones tu clave API de Supabase (recuerda no dejarla pública en producción)
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // **Clave API**
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // **Aquí puedes poner tu clave API de forma segura**
 
   if (!supabaseKey) {
     console.error('La clave de Supabase no está configurada.');
@@ -88,6 +86,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // ✅ Función para registrar el fichaje en Supabase
   async function handleFichaje(tipo) {
     try {
+      if (!user) {
+        showStatus('Usuario no autenticado', true);
+        return;  // No continuar si no hay usuario
+      }
+
       showStatus('Obteniendo ubicación...');
 
       // Obtener la ubicación
@@ -97,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Crear el objeto de fichaje
       const fichaje = {
-        user_id: user.id, // ID del usuario autenticado (cambiado de usuario_id a user_id)
+        usuario_id: user.id, // ID del usuario autenticado
         tipo,
         timestamp,
         latitude: position.coords.latitude,
