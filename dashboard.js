@@ -1,6 +1,7 @@
 import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
 const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
+// Asegúrate de no dejar la clave API en el código fuente para producción
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -9,6 +10,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const sortBySelect = document.getElementById('sortBy');
   const refreshButton = document.getElementById('refreshButton');
 
+  // Función para obtener los datos de los fichajes
   async function fetchWorkers() {
     const { data: fichajes, error } = await supabase
       .from('fichajes')
@@ -37,12 +39,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         lastCheckOut: fichaje.check_out,
         location: fichaje.location || { lat: 0, lng: 0 },
         totalCheckins: fichaje.total_checkins || 0,
-        isActive: !fichaje.check_out,
+        isActive: !fichaje.check_out, // Si no hay check-out, está activo
         recentAction: true,
       };
     });
   }
 
+  // Función para formatear la fecha y hora
   function formatDateTime(dateString) {
     if (!dateString) return '---';
     return new Date(dateString).toLocaleString('es-ES', {
@@ -54,10 +57,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Función para formatear la ubicación
   function formatLocation(location) {
     return `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
   }
 
+  // Función para renderizar la tabla de trabajadores
   async function renderWorkers() {
     const workers = await fetchWorkers();
     workersTableBody.innerHTML = '';
@@ -78,11 +83,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  // Evento para refrescar los datos de los fichajes
   refreshButton.addEventListener('click', async () => {
     refreshButton.disabled = true;
     await renderWorkers();
     refreshButton.disabled = false;
   });
 
+  // Cargar los datos de los fichajes al cargar la página
   await renderWorkers();
 });
