@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Asegúrate de que la librería de Supabase esté disponible
   if (!window.supabase) {
     console.error('La librería de Supabase no está cargada.');
-    return;  // Salir si Supabase no está disponible
+    return;
   }
 
   const { createClient } = window.supabase;
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (!supabaseKey) {
     console.error('La clave de Supabase no está configurada.');
-    return;  // Salir si la clave no está disponible
+    return;
   }
 
   // Inicializar el cliente de Supabase con la URL y la clave API
@@ -27,45 +27,36 @@ document.addEventListener('DOMContentLoaded', async () => {
   const statusMessage = document.getElementById('status');
   const nombreUsuario = document.getElementById('nombreUsuario');
 
-  // Verificar si los elementos del DOM existen antes de añadir eventos
-  if (!btnEntrada || !btnSalida || !btnCerrarSesion || !nombreUsuario || !statusMessage) {
-    console.error('Algunos elementos no están presentes en el DOM.');
-    return;  // Salir si no se encuentran los elementos
-  }
+  let user = null;
 
-  let user = null; // Inicializamos la variable user aquí
-
-  // ✅ Obtener el usuario autenticado desde Supabase
+  // Obtener el usuario autenticado desde Supabase
   try {
     const { data: { user: authenticatedUser }, error } = await supabase.auth.getUser();
 
     if (error || !authenticatedUser) {
-      // Si no hay usuario autenticado, redirigir a la página de inicio
       window.location.href = 'index.html';
       return;
     }
 
-    user = authenticatedUser; // Asignar el usuario autenticado a la variable global 'user'
-    // Mostrar el correo del usuario en la UI
+    user = authenticatedUser;
     nombreUsuario.textContent = user.email;
 
   } catch (error) {
     console.error('Error al obtener el usuario:', error);
-    window.location.href = 'index.html';  // Redirigir si hay un error
+    window.location.href = 'index.html';
     return;
   }
 
-  // ⏰ Función para actualizar el reloj en la UI
+  // Función para actualizar el reloj
   function updateClock() {
     const now = new Date();
     clockDisplay.textContent = now.toLocaleTimeString();
   }
 
-  // Actualizar el reloj cada segundo
   setInterval(updateClock, 1000);
   updateClock();
 
-  // 📍 Función para obtener la ubicación del usuario
+  // Función para obtener la ubicación del usuario
   async function getLocation() {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
@@ -80,19 +71,18 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  // 📢 Función para mostrar mensajes en pantalla
+  // Función para mostrar mensajes en pantalla
   function showStatus(message, isError = false) {
     statusMessage.textContent = message;
     statusMessage.className = 'status-message ' + (isError ? 'error' : 'active');
   }
 
-  // ✅ Función para registrar el fichaje en Supabase
+  // Función para registrar el fichaje en Supabase
   async function handleFichaje(tipo) {
     try {
-      // Comprobar si 'user' está definido
       if (!user) {
         showStatus('Usuario no autenticado', true);
-        return;  // No continuar si no hay usuario
+        return;
       }
 
       showStatus('Obteniendo ubicación...');
@@ -104,40 +94,55 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Crear el objeto de fichaje
       const fichaje = {
-        user_id: user.id, // ID del usuario autenticado
+        user_id: user.id,
         tipo,
         timestamp,
         latitude: position.coords.latitude,
         longitude: position.coords.longitude
       };
 
-      // 📤 Enviar los datos a Supabase
+      // Insertar el fichaje en Supabase
       const { error } = await supabase
-        .from('fichajes') // Asegúrate de que esta tabla exista en tu base de datos
+        .from('fichajes')
         .insert(fichaje);
 
       if (error) throw error;
 
+      // Mostrar mensaje de éxito
       showStatus(`${tipo} registrada correctamente a las ${new Date().toLocaleTimeString()}`);
+
+      // Actualizar el dashboard (función para actualizar la vista)
+      updateDashboard();
+
     } catch (error) {
       showStatus(`Error al registrar ${tipo.toLowerCase()}: ${error.message}`, true);
     }
   }
 
-  // 🎯 Eventos de fichaje
+  // Evento de fichaje de entrada
   btnEntrada.addEventListener('click', () => handleFichaje('Entrada'));
+
+  // Evento de fichaje de salida
   btnSalida.addEventListener('click', () => handleFichaje('Salida'));
 
-  // 🔴 Cierre de sesión
+  // Función para actualizar el dashboard con los nuevos fichajes
+  async function updateDashboard() {
+    // Aquí puedes llamar al código que actualiza tu dashboard.html
+    // Por ejemplo, podría hacer otra llamada a Supabase para obtener los últimos fichajes y refrescar la UI
+    console.log("Actualizando dashboard...");
+  }
+
+  // Evento de cierre de sesión
   btnCerrarSesion.addEventListener('click', async () => {
     try {
       await supabase.auth.signOut();
-      window.location.href = 'index.html'; // Redirigir a la página de inicio
+      window.location.href = 'index.html';
     } catch (error) {
       console.error('Error al cerrar sesión', error.message);
     }
   });
 });
+
 
 
 
