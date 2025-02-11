@@ -1,28 +1,25 @@
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+  // 📌 DOM completamente cargado
   console.log("📌 DOM completamente cargado");
-
-  // 🟢 Esperar hasta que el formulario exista en el DOM
-  let maxRetries = 10; // Intentar 10 veces (1 segundo)
-  while (!document.getElementById("registroForm") && maxRetries > 0) {
-    await new Promise((resolve) => setTimeout(resolve, 100)); // Espera 100ms
-    maxRetries--;
-  }
-
-  const registroForm = document.getElementById("registroForm");
-  if (!registroForm) {
-    console.error("❌ Error: Formulario de registro no encontrado. Verifica el id='registroForm' en tu HTML.");
-    return;
-  }
-  console.log("✅ Formulario de registro encontrado");
 
   // 🔹 Configuración de Supabase
   const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // ⚠️ Usa variables de entorno en producción
 
+  // Evita crear múltiples instancias de Supabase
   if (!window.supabase) {
     window.supabase = supabase.createClient(supabaseUrl, supabaseKey);
   }
   const supabase = window.supabase;
+
+  // 🟢 Esperar a que el formulario esté disponible
+  const registroForm = document.getElementById("registroForm");
+
+  // Verifica si el formulario existe en el DOM
+  if (!registroForm) {
+    console.error("❌ Error: Formulario de registro no encontrado. Verifica el id='registroForm' en tu HTML.");
+    return;
+  }
 
   // Manejar el envío del formulario
   registroForm.addEventListener("submit", async function (event) {
@@ -79,7 +76,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
-      window.location.href = "index.html";
+      window.location.href = "index.html"; // Redirigir al inicio
       
     } catch (error) {
       alert("Error en el registro: " + error.message);
