@@ -9,32 +9,54 @@ document.addEventListener('DOMContentLoaded', async () => {
   const refreshButton = document.getElementById('refreshButton');
 
   async function fetchWorkers() {
-    const { data: fichajes, error } = await supabase
+    // Obtener los fichajes
+    const { data: fichajes, error: fichajesError } = await supabase
       .from('fichajes')
-      .select('id, user_id, check_in, check_out, latitude, longitude, total_checkins')
+      .select('id, user_id, check_in, check_out, latitude, longitude')
       .order('check_in', { ascending: false });
 
-    if (error) {
-      console.error('Error al obtener fichajes:', error);
+    if (fichajesError) {
+      console.error('Error al obtener fichajes:', fichajesError);
       return [];
     }
 
-    const { data: users } = await supabase
+    // Obtener todos los socorristas
+    const { data: users, error: usersError } = await supabase
       .from('socorristas')
       .select('id, name');
 
-    return fichajes.map(fichaje => {
-      const user = users?.find(u => u.id === fichaje.user_id) || {};
+    if (usersError) {
+      console.error('Error al obtener socorristas:', usersError);
+      return [];
+    }
+
+    // Crear una lista de socorristas con fichajes
+    const workersWithFichajes = fichajes.map(fichaje => {
+      const user = users.find(u => u.id === fichaje.user_id) || {};
       return {
         id: fichaje.id,
         name: user.name || 'Desconocido',
         lastCheckIn: fichaje.check_in,
         lastCheckOut: fichaje.check_out,
         location: `${fichaje.latitude?.toFixed(4) || 0}, ${fichaje.longitude?.toFixed(4) || 0}`,
-        totalCheckins: fichaje.total_checkins || 0,
         isActive: !fichaje.check_out
       };
     });
+
+    // Para obtener el total de fichajes de cada trabajador
+    const workerCheckins = {};
+
+    // Contar el total de fichajes por trabajador
+    fichajes.forEach(fichaje => {
+      const userId = fichaje.user_id;
+      workerCheckins[userId] = (workerCheckins[userId] || 0) + 1;
+    });
+
+    // Incluir el total de fichajes en cada trabajador
+    return workersWithFichajes.map(worker => ({
+      ...worker,
+      totalCheckins: workerCheckins[worker.id] || 0
+    }));
   }
 
   async function renderWorkers() {
@@ -52,7 +74,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       : '<tr><td colspan="6">No se han encontrado fichajes.</td></tr>';
   }
 
+  // Refrescar los datos cuando el botón es clickeado
   refreshButton?.addEventListener('click', renderWorkers);
+
+  // Llamar a la función para renderizar los trabajadores al cargar la página
   await renderWorkers();
 });
 
