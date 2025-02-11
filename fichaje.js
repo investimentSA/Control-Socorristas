@@ -77,26 +77,45 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusMessage.className = 'status-message ' + (isError ? 'error' : 'active');
   }
 
-  // Función para comprobar si el usuario ya tiene un fichaje de ese tipo (entrada/salida)
-  async function checkExistingFichaje(tipo) {
+  // Función para comprobar si el usuario ya tiene un fichaje de entrada del día
+  async function checkEntradaDelDia() {
+    const today = new Date().toISOString().split('T')[0]; // Fecha de hoy (YYYY-MM-DD)
+
     const { data, error } = await supabase
       .from('fichajes')
       .select('*')
       .eq('user_id', user.id)
-      .eq('tipo', tipo)
-      .is('check_out', null) // Para fichajes de entrada sin salida
-      .limit(1); // Limitar a solo 1 resultado
+      .eq('tipo', 'Entrada')
+      .gte('check_in', `${today}T00:00:00`)  // Fichajes desde la medianoche de hoy
+      .lte('check_in', `${today}T23:59:59`)  // Fichajes hasta el final del día
+      .is('check_out', null);  // Verificar que no haya salida registrada
 
     if (error) {
-      console.error('Error al comprobar fichaje:', error);
+      console.error('Error al comprobar la entrada:', error);
       return false;
     }
 
-    // Si se encuentra un fichaje, devolver 'true'
-    return data && data.length > 0;
+    return data && data.length > 0; // Si ya existe una entrada hoy, devolver true
   }
 
-  // Función para registrar el fichaje en Supabase
+  // Función para comprobar si el usuario ya tiene un fichaje de salida (sin salida registrada)
+  async function checkSalidaRegistrada() {
+    const { data, error } = await supabase
+      .from('fichajes')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('tipo', 'Salida')
+      .is('check_out', null);  // Si no hay salida registrada
+
+    if (error) {
+      console.error('Error al comprobar salida:', error);
+      return false;
+    }
+
+    return data && data.length > 0;  // Si ya existe una salida sin salida registrada, devolver true
+  }
+
+  // Función para registrar el fichaje
   async function handleFichaje(tipo) {
     try {
       if (!user) {
@@ -104,11 +123,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
       }
 
-      // Verificar si el usuario ya tiene un fichaje de ese tipo (entrada/salida) sin salida registrada
-      const existing = await checkExistingFichaje(tipo);
-      if (existing) {
-        showStatus(`${tipo} ya registrada. No puedes registrar otro ${tipo.toLowerCase()}.`, true);
-        return;
+      // Verificar si el usuario ya tiene una entrada registrada hoy
+      if (tipo === 'Entrada') {
+        const hasEntradaHoy = await checkEntradaDelDia();
+        if (hasEntradaHoy) {
+          showStatus('Ya has fichado entrada hoy. Espera al día siguiente para fichar de nuevo.', true);
+          return;
+        }
+      }
+
+      // Verificar si ya hay una salida registrada
+      if (tipo === 'Salida') {
+        const hasSalidaRegistrada = await checkSalidaRegistrada();
+        if (hasSalidaRegistrada) {
+          showStatus('Salida ya registrada. No puedes registrar otra salida.', true);
+          return;
+        }
       }
 
       showStatus('Obteniendo ubicación...');
@@ -181,4 +211,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
 
