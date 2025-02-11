@@ -85,14 +85,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       .eq('user_id', user.id)
       .eq('tipo', tipo)
       .is('check_out', null) // Para fichajes de entrada sin salida
-      .single(); // Verificamos solo uno
+      .limit(1); // Limitar a solo 1 resultado
 
     if (error) {
       console.error('Error al comprobar fichaje:', error);
       return false;
     }
 
-    return data ? true : false;
+    // Si se encuentra un fichaje, devolver 'true'
+    return data && data.length > 0;
   }
 
   // Función para registrar el fichaje en Supabase
