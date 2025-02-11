@@ -32,7 +32,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // Verificar si el correo ya está registrado
+      // Verificar si el correo ya está registrado en Supabase
       const { data: existingUser, error: emailCheckError } = await supabase
         .from("usuarios")
         .select("correo")
@@ -64,10 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      // Insertar usuario en la tabla 'usuarios'
+      // Si el registro fue exitoso en Auth, ahora insertamos en la tabla 'usuarios'
       const { error: insertError } = await supabase
         .from("usuarios")
-        .insert([{ nombre: nombreCompleto, correo: email }]);
+        .upsert([{ nombre: nombreCompleto, correo: email }]);
 
       if (insertError) {
         alert("Error al registrar los datos del usuario: " + insertError.message);
