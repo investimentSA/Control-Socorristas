@@ -77,11 +77,36 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusMessage.className = 'status-message ' + (isError ? 'error' : 'active');
   }
 
+  // Función para comprobar si el usuario ya tiene un fichaje de ese tipo (entrada/salida)
+  async function checkExistingFichaje(tipo) {
+    const { data, error } = await supabase
+      .from('fichajes')
+      .select('*')
+      .eq('user_id', user.id)
+      .eq('tipo', tipo)
+      .is('check_out', null) // Para fichajes de entrada sin salida
+      .single(); // Verificamos solo uno
+
+    if (error) {
+      console.error('Error al comprobar fichaje:', error);
+      return false;
+    }
+
+    return data ? true : false;
+  }
+
   // Función para registrar el fichaje en Supabase
   async function handleFichaje(tipo) {
     try {
       if (!user) {
         showStatus('Usuario no autenticado', true);
+        return;
+      }
+
+      // Verificar si el usuario ya tiene un fichaje de ese tipo (entrada/salida) sin salida registrada
+      const existing = await checkExistingFichaje(tipo);
+      if (existing) {
+        showStatus(`${tipo} ya registrada. No puedes registrar otro ${tipo.toLowerCase()}.`, true);
         return;
       }
 
@@ -98,7 +123,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         tipo,
         timestamp,
         latitude: position.coords.latitude,
-        longitude: position.coords.longitude
+        longitude: position.coords.longitude,
+        check_out: tipo === 'Salida' ? timestamp : null // Si es salida, registramos la hora de salida.
       };
 
       // Insertar el fichaje en Supabase
@@ -142,5 +168,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
 
 
