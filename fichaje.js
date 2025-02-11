@@ -7,9 +7,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { createClient } = window.supabase;
 
-  // Configuración de Supabase (evita dejar la clave directamente en el código)
+  // Configuración de Supabase
   const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co'; // URL de tu Supabase
-  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // **Aquí puedes poner tu clave API de forma segura**
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw'; // **Aquí está tu clave API**
 
   if (!supabaseKey) {
     console.error('La clave de Supabase no está configurada.');
@@ -153,9 +153,21 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Función para actualizar el dashboard con los nuevos fichajes
   async function updateDashboard() {
-    // Aquí puedes llamar al código que actualiza tu dashboard.html
-    // Por ejemplo, podría hacer otra llamada a Supabase para obtener los últimos fichajes y refrescar la UI
-    console.log("Actualizando dashboard...");
+    try {
+      const { data: fichajes, error } = await supabase
+        .from('fichajes')
+        .select('id, tipo, check_in, check_out, latitude, longitude')
+        .eq('user_id', user.id)
+        .order('check_in', { ascending: false })
+        .limit(5);
+
+      if (error) throw error;
+
+      // Actualizar el dashboard con los últimos fichajes
+      console.log(fichajes);  // Aquí podrías actualizar la UI con los datos obtenidos.
+    } catch (error) {
+      console.error('Error al obtener los fichajes:', error);
+    }
   }
 
   // Evento de cierre de sesión
