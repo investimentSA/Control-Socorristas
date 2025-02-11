@@ -55,7 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Registro en Supabase Auth
-      const { error: authError } = await supabase.auth.signUp({
+      const { error: authError, user } = await supabase.auth.signUp({
         email,
         password,
         options: { data: { nombre: nombreCompleto } },
@@ -64,6 +64,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (authError) {
         console.error("⚠️ Error en la autenticación:", authError.message);
         alert("Error al crear la cuenta: " + authError.message);
+        return;
+      }
+
+      // Verificar si la autenticación fue exitosa antes de insertar en la tabla 'usuarios'
+      if (!user) {
+        alert("No se pudo autenticar el usuario. Intenta nuevamente.");
         return;
       }
 
