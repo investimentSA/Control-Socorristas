@@ -42,12 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
         .eq("correo", email)
         .single();
 
+      // Manejar el error de la verificación de correo
       if (emailCheckError && emailCheckError.code !== "PGRST116") {
         console.error("⚠️ Error al verificar el correo:", emailCheckError.message);
         alert("Hubo un problema al verificar el correo.");
         return;
       }
 
+      // Si ya existe un usuario con ese correo
       if (existingUser) {
         alert("Este correo electrónico ya está registrado.");
         return;
@@ -77,10 +79,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
       alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
       window.location.href = "index.html"; // Redirigir al inicio
-      
+
     } catch (error) {
       alert("Error en el registro: " + error.message);
     }
   });
 });
-
