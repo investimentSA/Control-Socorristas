@@ -22,10 +22,12 @@ document.addEventListener("DOMContentLoaded", () => {
   registroForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
+    // Obtener los valores del formulario
     const nombreCompleto = document.getElementById("nombreCompleto")?.value.trim();
     const email = document.getElementById("email")?.value.trim();
     const password = document.getElementById("password")?.value.trim();
 
+    // Validación básica de los campos
     if (!nombreCompleto || !email || !password) {
       alert("Por favor, completa todos los campos.");
       return;
@@ -78,9 +80,11 @@ document.addEventListener("DOMContentLoaded", () => {
       window.location.href = "index.html"; // Redirigir al inicio
 
     } catch (error) {
+      console.error("⚠️ Error en el registro:", error); // Mejor manejo del error
       alert("Error en el registro: " + error.message);
     }
   });
 });
+
 
 
