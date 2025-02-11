@@ -16,8 +16,14 @@ document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", async function(event) {
       event.preventDefault();
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      // Validar campos
+      if (!email || !password) {
+        alert("Por favor, completa ambos campos.");
+        return;
+      }
 
       try {
         const { data, error } = await supabase.auth.signInWithPassword({
