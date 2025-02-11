@@ -1,8 +1,9 @@
-// Usa la versión CDN de Supabase sin `import`
 document.addEventListener("DOMContentLoaded", () => {
+  console.log("📌 DOM completamente cargado");
+
   // 🔹 Configuración de Supabase
   const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // ⚠️ NO expongas esta clave en producción
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  
 
   // Evitar múltiples instancias de Supabase
   if (!window.supabase) {
@@ -10,13 +11,15 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   const supabase = window.supabase;
 
-  // Esperar a que el formulario exista en el DOM
+  // Obtener el formulario de registro
   const registroForm = document.getElementById("registroForm");
 
   if (!registroForm) {
-    console.error("❌ Error: Formulario de registro no encontrado.");
+    console.error("❌ Error: Formulario de registro no encontrado. Verifica el id='registroForm' en tu HTML.");
     return;
   }
+
+  console.log("✅ Formulario de registro encontrado");
 
   // Manejar el envío del formulario
   registroForm.addEventListener("submit", async function (event) {
@@ -41,7 +44,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .single();
 
       if (emailCheckError && emailCheckError.code !== "PGRST116") {
-        console.error("Error al verificar el correo:", emailCheckError.message);
+        console.error("⚠️ Error al verificar el correo:", emailCheckError.message);
         alert("Hubo un problema al verificar el correo.");
         return;
       }
@@ -74,8 +77,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
-      
-      // ✅ Redirección segura
       window.location.href = "index.html";
       
     } catch (error) {
@@ -83,3 +84,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
+
