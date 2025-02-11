@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 🔹 Configuración de Supabase
   const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // ⚠️ Usa variables de entorno en producción
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // ⚠️ Usa variables de entorno en producción (nunca expongas la clave aquí)
 
   // Crear el cliente de Supabase
   const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (authError) {
+        console.error("⚠️ Error en la autenticación:", authError.message);
         alert("Error al crear la cuenta: " + authError.message);
         return;
       }
@@ -72,6 +73,7 @@ document.addEventListener("DOMContentLoaded", () => {
         .upsert([{ nombre: nombreCompleto, correo: email }]);
 
       if (insertError) {
+        console.error("⚠️ Error al registrar los datos del usuario:", insertError.message);
         alert("Error al registrar los datos del usuario: " + insertError.message);
         return;
       }
@@ -85,6 +87,5 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 });
-
 
 
