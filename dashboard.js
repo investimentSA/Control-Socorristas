@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const workersWithFichajes = fichajes.map(fichaje => {
         const user = users.find(u => u.id === fichaje.user_id) || {};
         return {
-          id: fichaje.id,
+          id: fichaje.user_id,  // Usa el ID del socorrista para el worker
           name: user.name || 'Desconocido',
           lastCheckIn: fichaje.check_in ? new Date(fichaje.check_in).toLocaleString() : '---',
           lastCheckOut: fichaje.check_out ? new Date(fichaje.check_out).toLocaleString() : '---',
@@ -92,4 +92,5 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Inicializar la tabla de trabajadores al cargar la página
   await renderWorkers();
 });
+
 
