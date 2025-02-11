@@ -121,16 +121,16 @@ document.addEventListener('DOMContentLoaded', async () => {
       const fichaje = {
         user_id: user.id,
         tipo,
-        timestamp,
+        check_in: tipo === 'Entrada' ? timestamp : null, // Si es entrada, registramos la hora de entrada
+        check_out: tipo === 'Salida' ? timestamp : null, // Si es salida, registramos la hora de salida
         latitude: position.coords.latitude,
-        longitude: position.coords.longitude,
-        check_out: tipo === 'Salida' ? timestamp : null // Si es salida, registramos la hora de salida.
+        longitude: position.coords.longitude
       };
 
       // Insertar el fichaje en Supabase
       const { error } = await supabase
         .from('fichajes')
-        .insert(fichaje);
+        .insert([fichaje]);
 
       if (error) throw error;
 
@@ -168,6 +168,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
-
 
 
