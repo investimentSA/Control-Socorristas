@@ -80,9 +80,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Verifica si la respuesta contiene datos, lo que significa que la cuenta fue creada
         if (data) {
-          // Insertar los datos del usuario en la tabla 'usuarios', excluyendo la contraseña
+          // Verificar que la tabla 'usuarios' existe y luego insertar
           const { error: insertError } = await supabase
-            .from("usuarios")
+            .from("usuarios") // Asegúrate de que la tabla 'usuarios' esté en tu base de datos
             .insert([{
               nombre: nombreCompleto,
               correo: email,
