@@ -1,33 +1,24 @@
 document.addEventListener("DOMContentLoaded", () => {
   // Configuración de Supabase
-  const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  // URL de tu Supabase
-  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw";  // Tu clave de API
+  const supabaseUrl = "https://lgvmxoamdxbhtmicawlv.supabase.co";  
+  const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw"; // ⚠️ Usa variables de entorno en producción
+  const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-  // Asegúrate de que Supabase.js esté cargado
-  if (!window.supabase || !window.supabase.createClient) {
-    console.error("La librería de Supabase no está cargada o no es accesible.");
-    return;
-  }
-  
-  // Inicializar el cliente de Supabase
-  const { createClient } = window.supabase;
-  const supabase = createClient(supabaseUrl, supabaseKey);
-
-  // Captura el formulario de registro
+  // Capturar el formulario de registro
   const registroForm = document.getElementById("registroForm");
   if (!registroForm) {
     console.error("Formulario de registro no encontrado.");
     return;
   }
 
-  // Maneja el envío del formulario
+  // Manejar el envío del formulario
   registroForm.addEventListener("submit", async function (event) {
     event.preventDefault();
 
     // Obtener valores del formulario
-    const nombreCompleto = document.getElementById("nombreCompleto").value.trim();
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
+    const nombreCompleto = document.getElementById("nombreCompleto")?.value.trim();
+    const email = document.getElementById("email")?.value.trim();
+    const password = document.getElementById("password")?.value.trim();
 
     if (!nombreCompleto || !email || !password) {
       alert("Por favor, completa todos los campos.");
@@ -35,58 +26,39 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // Primero, verifica si el correo ya existe en la tabla "usuarios"
-      const { data: existingUser, error: emailCheckError } = await supabase
+      // Verificar si el correo ya existe
+      const { data: existingUser } = await supabase
         .from("usuarios")
         .select("correo")
         .eq("correo", email)
-        .single(); // Usamos .single() para obtener un solo resultado
-
-      if (emailCheckError) {
-        console.error("Error al verificar el correo:", emailCheckError.message);
-        alert("Hubo un problema al verificar el correo.");
-        return;
-      }
+        .single()
+        .catch(() => null);
 
       if (existingUser) {
         alert("Este correo electrónico ya está registrado.");
-        return; // Si el correo ya está registrado, no continua el registro
+        return;
       }
 
       // Registro en Supabase Auth
-      const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-        options: {
-          data: { nombre: nombreCompleto }, // Guardar el nombre como metadato en Auth
-        },
+      const { error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { nombre: nombreCompleto } },
       });
 
-      if (error) {
-        alert("Error al crear la cuenta: " + error.message);
-        return;
-      }
+      if (authError) throw authError;
 
-      // Insertar los datos del usuario en la tabla 'usuarios'
+      // Insertar usuario en la tabla 'usuarios'
       const { error: insertError } = await supabase
         .from("usuarios")
-        .insert([
-          {
-            nombre: nombreCompleto,
-            correo: email,
-          },
-        ]);
+        .insert([{ nombre: nombreCompleto, correo: email }]);
 
-      if (insertError) {
-        alert("Error al registrar los datos del usuario: " + insertError.message);
-        return;
-      }
+      if (insertError) throw insertError;
 
       alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
-      window.location.href = "index.html"; // Redirigir al login
-
+      window.location.href = "index.html";
     } catch (error) {
-      alert("Hubo un error en el registro: " + error.message);
+      alert("Error en el registro: " + error.message);
     }
   });
 });
