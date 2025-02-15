@@ -5,48 +5,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';
   const supabase = createClient(supabaseUrl, supabaseKey);
 
-  // Inicio de sesión
-  const loginForm = document.getElementById("loginForm");
-  if (loginForm) {
-    loginForm.addEventListener("submit", async function (event) {
-      event.preventDefault();
-
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      if (!email || !password) {
-        alert("Por favor, completa ambos campos.");
-        return;
-      }
-
-      try {
-        const { data, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-
-        if (error) {
-          alert('Correo o contraseña incorrectos');
-        } else {
-          alert('¡Inicio de sesión exitoso!');
-          window.location.href = 'fichaje.html';
-        }
-      } catch (error) {
-        alert('Error al intentar iniciar sesión');
-        console.error(error);
-      }
-    });
-  }
-
   // Registro de usuario
   const registroForm = document.getElementById("registroForm");
   if (registroForm) {
     registroForm.addEventListener("submit", async function (event) {
       event.preventDefault();
 
+      // Se actualizan los ids para coincidir con los del HTML
       const nombreCompleto = document.getElementById("nombreCompleto").value.trim();
-      const email = document.getElementById("emailRegistro").value.trim();
-      const password = document.getElementById("passwordRegistro").value.trim();
+      const email = document.getElementById("email").value.trim();  // Cambié emailRegistro por email
+      const password = document.getElementById("password").value.trim();  // Cambié passwordRegistro por password
 
       if (!nombreCompleto || !email || !password) {
         alert("Por favor, completa todos los campos.");
@@ -103,4 +71,5 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 });
+
 
