@@ -53,6 +53,10 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Este correo electrónico ya está registrado.");
         return;
       }
+const headers = {
+  'Accept': 'application/json',
+  'Content-Type': 'application/json',
+};
 
       // Registro en Supabase Auth
       const { error: authError, user } = await supabase.auth.signUp({
