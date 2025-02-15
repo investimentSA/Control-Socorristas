@@ -19,7 +19,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (fichajesError) throw new Error('Error al obtener fichajes.');
 
-      // Obtener los socorristas
+      // Obtener los socorristas (trabajadores)
       const { data: users, error: usersError } = await supabase
         .from('socorristas')
         .select('id, name');
