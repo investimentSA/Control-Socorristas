@@ -39,6 +39,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     return;
   }
 
+  // Verificar si el usuario existe en la tabla de usuarios
+  async function verifyUserExists(userId) {
+    const { data, error } = await supabase
+      .from('usuarios') // Asumiendo que la tabla de usuarios se llama 'usuarios'
+      .select('id')
+      .eq('id', userId)
+      .single();
+
+    if (error || !data) {
+      console.error('El usuario no existe en la base de datos', error);
+      return false;
+    }
+
+    return true;
+  }
+
   // Función para actualizar el reloj
   function updateClock() {
     const now = new Date();
@@ -103,6 +119,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
       if (!user) {
         showStatus('Usuario no autenticado', true);
+        return;
+      }
+
+      // Verificar si el usuario existe en la base de datos antes de registrar el fichaje
+      const userExists = await verifyUserExists(user.id);
+      if (!userExists) {
+        showStatus('El usuario no existe en la base de datos', true);
         return;
       }
 
@@ -188,6 +211,5 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
-
 
 
