@@ -53,10 +53,6 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("Este correo electrónico ya está registrado.");
         return;
       }
-const headers = {
-  'Accept': 'application/json',
-  'Content-Type': 'application/json',
-};
 
       // Registro en Supabase Auth
       const { error: authError, user } = await supabase.auth.signUp({
@@ -65,6 +61,7 @@ const headers = {
         options: { data: { nombre: nombreCompleto } },
       });
 
+      // Verificar si ocurrió un error en la autenticación
       if (authError) {
         console.error("⚠️ Error en la autenticación:", authError.message);
         alert("Error al crear la cuenta: " + authError.message);
@@ -82,12 +79,14 @@ const headers = {
         .from("usuarios")
         .upsert([{ nombre: nombreCompleto, correo: email }]);
 
+      // Manejo de errores al insertar los datos del usuario
       if (insertError) {
         console.error("⚠️ Error al registrar los datos del usuario:", insertError.message);
         alert("Error al registrar los datos del usuario: " + insertError.message);
         return;
       }
 
+      // Mensaje de éxito y redirección
       alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
       window.location.href = "index.html"; // Redirigir al inicio
 
