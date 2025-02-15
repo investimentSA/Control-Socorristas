@@ -45,64 +45,6 @@ document.addEventListener("DOMContentLoaded", () => {
   } else {
     console.error("Formulario de inicio de sesión no encontrado.");
   }
-
-  // Asegurarse de que el formulario de registro esté disponible en el DOM
-  const registroForm = document.getElementById("registroForm");
-  if (registroForm) {
-    // Manejar el registro de usuario
-    registroForm.addEventListener("submit", async function(event) {
-      event.preventDefault();
-
-      const nombreCompleto = document.getElementById("nombreCompleto").value.trim();
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value.trim();
-
-      // Validar que los campos no estén vacíos
-      if (!nombreCompleto || !email || !password) {
-        alert("Por favor, completa todos los campos.");
-        return;
-      }
-
-      try {
-        // Registro en Supabase Auth
-        const { data, error } = await supabase.auth.signUp({
-          email: email,
-          password: password,
-          options: {
-            data: { nombre: nombreCompleto }, // Guardar el nombre como metadato en Auth
-          },
-        });
-
-        if (error) {
-          alert("Error al crear la cuenta: " + error.message);
-          return;
-        }
-
-        // Verifica si la respuesta contiene datos, lo que significa que la cuenta fue creada
-        if (data) {
-          // Verificar que la tabla 'usuarios' existe y luego insertar
-          const { error: insertError } = await supabase
-            .from("usuarios") // Asegúrate de que la tabla 'usuarios' esté en tu base de datos
-            .insert([{
-              nombre: nombreCompleto,
-              correo: email,
-            }]);
-
-          if (insertError) {
-            alert("Error al registrar los datos del usuario: " + insertError.message);
-            return;
-          }
-
-          alert("¡Registro exitoso! Revisa tu correo para confirmar tu cuenta.");
-          window.location.href = "index.html"; // Redirigir al login
-        }
-      } catch (error) {
-        alert("Hubo un error en el registro: " + error.message);
-      }
-    });
-  } else {
-    console.error("Formulario de registro no encontrado.");
-  }
 });
 
 
