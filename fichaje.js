@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       // Crear el objeto de fichaje
       const fichaje = {
-        user_id: user.id,
+        user_id: user.id,  // Usamos el user.id real
         tipo,
         check_in: tipo === 'Entrada' ? timestamp : null, // Si es entrada, registramos la hora de entrada
         check_out: tipo === 'Salida' ? timestamp : null, // Si es salida, registramos la hora de salida
@@ -211,5 +211,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 });
+
 
 
