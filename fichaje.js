@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   const { createClient } = window.supabase;
 
-  // ** Usa un entorno seguro o variable de entorno para la URL y la clave.
   const supabaseUrl = 'https://lgvmxoamdxbhtmicawlv.supabase.co';
   const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxndm14b2FtZHhiaHRtaWNhd2x2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg2NjA0NDIsImV4cCI6MjA1NDIzNjQ0Mn0.0HpIAqpg3gPOAe714dAJPkWF8y8nQBOK7_zf_76HFKw';  // Usa una variable de entorno real aquí
 
@@ -34,7 +33,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     user = authenticatedUser;
     nombreUsuario.textContent = user.email;
-
   } catch (error) {
     console.error('Error al obtener el usuario:', error);
     window.location.href = 'index.html';
@@ -130,7 +128,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       const timestamp = new Date().toISOString();
 
       const fichaje = {
-        user_id: user.id,
+        user_id: user.id,  // Asegúrate de que el user.id esté correctamente asignado
         tipo,
         check_in: tipo === 'Entrada' ? timestamp : null,
         check_out: tipo === 'Salida' ? timestamp : null,
@@ -140,12 +138,23 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       const { error } = await supabase.from('fichajes').insert([fichaje]);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error al registrar fichaje:', error.message);
+        if (error.message.includes('violates foreign key constraint')) {
+          showStatus('El usuario no existe en la base de datos.', true);
+        } else if (error.message.includes('No API key found')) {
+          showStatus('No se encontró la clave API en la solicitud. Verifica tu configuración.', true);
+        } else {
+          showStatus(`Error desconocido al registrar el fichaje: ${error.message}`, true);
+        }
+        return;
+      }
 
       showStatus(`${tipo} registrada correctamente a las ${new Date().toLocaleTimeString()}`);
       updateDashboard();
 
     } catch (error) {
+      console.error('Error al registrar fichaje:', error);
       showStatus(`Error al registrar ${tipo.toLowerCase()}: ${error.message}`, true);
     }
   }
